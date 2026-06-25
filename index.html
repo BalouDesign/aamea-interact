@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AAMEA Interact — Kigali 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+:root {
+  --ink:        #0E1117;
+  --ink-mid:    #3D4451;
+  --ink-soft:   #6B7280;
+  --ink-faint:  #9CA3AF;
+  --border:     #E5E7EB;
+  --surface:    #F9FAFB;
+  --white:      #FFFFFF;
+  --aamea-deep: #1A2B5E;
+  --aamea-gold: #C9973A;
+  --aamea-teal: #1B7B6E;
+  --aamea-rust: #C0472F;
+  --pill-r: 999px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-xl: 22px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);font-size:15px;line-height:1.6;min-height:100vh}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:var(--aamea-deep);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-brand{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--white);text-decoration:none;cursor:pointer}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:var(--aamea-gold)}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-link{padding:6px 14px;border-radius:var(--pill-r);font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);text-decoration:none;cursor:pointer;border:none;background:transparent;transition:all 0.15s}
+.nav-link:hover,.nav-link.active{color:var(--white);background:rgba(255,255,255,0.1)}
+.nav-link.active{color:var(--aamea-gold)}
+.nav-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;background:var(--aamea-gold);color:var(--aamea-deep)}
+
+/* VIEWS */
+.view{display:none}.view.active{display:block}
+
+/* HERO */
+.hero-band{background:var(--aamea-deep);padding:44px 24px 36px;text-align:center;position:relative;overflow:hidden}
+.hero-band::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(201,151,58,0.04) 40px,rgba(201,151,58,0.04) 41px)}
+.hero-eyebrow{font-size:11px;letter-spacing:0.12em;font-weight:500;color:var(--aamea-gold);text-transform:uppercase;margin-bottom:10px}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(26px,5vw,42px);font-weight:700;color:var(--white);line-height:1.15;margin-bottom:10px}
+.hero-title span{color:var(--aamea-gold)}
+.hero-sub{font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:28px}
+.hero-stats{display:flex;justify-content:center;gap:36px;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat-num{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--white);display:block}
+.hero-stat-label{font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.06em}
+
+/* CONTAINER */
+.container{max-width:1080px;margin:0 auto;padding:0 24px}
+
+/* SEARCH */
+.search-bar-wrap{padding:20px 0 0}
+.search-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:240px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-soft);pointer-events:none}
+.search-input{width:100%;padding:10px 14px 10px 38px;border:1px solid var(--border);border-radius:var(--pill-r);font-size:14px;font-family:'Inter',sans-serif;background:var(--white);color:var(--ink);outline:none;transition:border-color 0.15s}
+.search-input:focus{border-color:var(--aamea-deep)}
+.filter-sel{padding:10px 30px 10px 14px;border:1px solid var(--border);border-radius:var(--pill-r);font-size:13px;font-family:'Inter',sans-serif;background:var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;color:var(--ink-mid);outline:none;cursor:pointer;appearance:none}
+.filter-count{font-size:13px;color:var(--ink-soft);white-space:nowrap}
+
+/* GRID */
+.dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;padding:20px 0 48px}
+.p-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px;cursor:pointer;transition:box-shadow 0.15s,transform 0.12s;position:relative}
+.p-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.p-track-bar{position:absolute;top:0;left:20px;right:20px;height:3px;border-radius:0 0 3px 3px}
+.p-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0}
+.p-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.p-title-line{font-size:12px;color:var(--ink-soft);line-height:1.4}
+.p-org-line{font-size:12px;color:var(--aamea-deep);font-weight:500}
+.p-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--pill-r);font-size:11px;font-weight:500}
+.pill-c{background:#EEF2FF;color:#3730A3}
+.pill-t{background:#F0FDF4;color:#166534}
+.p-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--pill-r);font-size:12px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;border:none;transition:all 0.15s;text-decoration:none;justify-content:center}
+.btn-primary{background:var(--aamea-deep);color:var(--white);flex:1}.btn-primary:hover{background:#14225A}
+.btn-ghost{background:var(--surface);color:var(--ink-mid);border:1px solid var(--border)}.btn-ghost:hover{background:var(--border)}
+.btn-teal{background:var(--aamea-teal);color:var(--white)}.btn-teal:hover{background:#155f54}
+.btn-gold{background:var(--aamea-gold);color:var(--white)}.btn-gold:hover{background:#b5872f}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(14,17,23,0.55);align-items:flex-start;justify-content:center;padding:32px 16px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:var(--r-xl);width:100%;max-width:600px;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;animation:slideUp 0.2s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-hdr{background:var(--aamea-deep);padding:28px 28px 24px;position:relative}
+.modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.12);border:none;color:var(--white);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:rgba(255,255,255,0.22)}
+.modal-pr{display:flex;align-items:center;gap:16px}
+.modal-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--white);margin-bottom:2px}
+.modal-role{font-size:13px;color:rgba(255,255,255,0.6)}
+.modal-org{font-size:13px;color:var(--aamea-gold);font-weight:500;margin-top:2px}
+.modal-body{padding:24px 28px}
+.modal-sec{margin-bottom:20px}
+.modal-sec-label{font-size:10px;font-weight:600;letter-spacing:0.1em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:8px}
+.modal-bio{font-size:14px;color:var(--ink-mid);line-height:1.7}
+.modal-acts{display:flex;gap:10px;padding:0 28px 24px;flex-wrap:wrap}
+
+/* QR */
+.qr-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(14,17,23,0.72);align-items:center;justify-content:center;padding:24px}
+.qr-overlay.open{display:flex}
+.qr-card{background:var(--white);border-radius:var(--r-xl);padding:32px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.25);animation:slideUp 0.2s ease}
+.qr-ey{font-size:10px;letter-spacing:0.1em;color:var(--aamea-gold);text-transform:uppercase;font-weight:600;margin-bottom:4px}
+.qr-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--aamea-deep);margin-bottom:2px}
+.qr-role{font-size:13px;color:var(--ink-soft);margin-bottom:20px}
+.qr-wrap{background:var(--surface);border-radius:var(--r-md);padding:16px;margin-bottom:16px;display:inline-block}
+.qr-url{font-size:11px;color:var(--ink-faint);margin-bottom:20px;word-break:break-all}
+.qr-close-btn{width:100%;padding:10px;border-radius:var(--pill-r);background:var(--aamea-deep);color:var(--white);border:none;font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* PROFILE VIEW */
+.profile-wrap{max-width:680px;margin:0 auto;padding:32px 24px 60px}
+.prof-hdr{background:var(--aamea-deep);border-radius:var(--r-xl);padding:32px;margin-bottom:20px;position:relative;overflow:hidden}
+.prof-hdr::after{content:'';position:absolute;bottom:-30px;right:-20px;width:140px;height:140px;border-radius:50%;background:rgba(201,151,58,0.12)}
+.prof-edit-btn{position:absolute;top:20px;right:20px;padding:6px 14px;border-radius:var(--pill-r);border:1px solid rgba(255,255,255,0.25);background:transparent;color:rgba(255,255,255,0.8);font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
+.prof-edit-btn:hover{background:rgba(255,255,255,0.1);color:var(--white)}
+.prof-name{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--white);margin-bottom:4px}
+.prof-role{font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:4px}
+.prof-org{font-size:14px;color:var(--aamea-gold);font-weight:500}
+.prof-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:24px;margin-bottom:14px}
+.prof-sec-title{font-size:11px;font-weight:600;letter-spacing:0.08em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:14px}
+.fg{margin-bottom:14px}
+.fl{font-size:12px;color:var(--ink-soft);margin-bottom:5px;display:block}
+.fi,.ft,.fs{width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:var(--r-md);font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);background:var(--white);outline:none;transition:border-color 0.15s}
+.fi:focus,.ft:focus{border-color:var(--aamea-deep)}
+.ft{resize:vertical;min-height:90px;line-height:1.6}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fsave{width:100%;padding:11px;background:var(--aamea-deep);color:var(--white);border:none;border-radius:var(--pill-r);font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;margin-top:4px}
+.fsave:hover{background:#14225A}
+
+/* LOGIN */
+.login-wrap{min-height:calc(100vh - 56px);display:flex;align-items:center;justify-content:center;padding:40px 24px}
+.login-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:40px;width:100%;max-width:400px;box-shadow:var(--shadow-md)}
+.login-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--aamea-deep);margin-bottom:4px}
+.login-logo span{color:var(--aamea-gold)}
+.login-tag{font-size:13px;color:var(--ink-soft);margin-bottom:28px}
+.login-div{display:flex;align-items:center;gap:10px;margin:16px 0;font-size:12px;color:var(--ink-faint)}
+.login-div::before,.login-div::after{content:'';flex:1;height:1px;background:var(--border)}
+.demo-note{background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--r-md);padding:12px 14px;font-size:12px;color:#9A3412;margin-top:16px;line-height:1.6}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 24px;color:var(--ink-soft)}
+.empty h3{font-size:16px;font-weight:500;color:var(--ink-mid);margin-bottom:6px}
+.empty p{font-size:13px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--white);padding:10px 20px;border-radius:var(--pill-r);font-size:13px;font-weight:500;box-shadow:var(--shadow-md);z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* PLACEHOLDER VIEWS */
+.ph-wrap{max-width:680px;margin:0 auto;padding:48px 24px}
+.ph-label{font-size:11px;font-weight:600;letter-spacing:0.08em;color:var(--aamea-gold);text-transform:uppercase;margin-bottom:8px}
+.ph-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--aamea-deep);margin-bottom:12px}
+.ph-desc{font-size:14px;color:var(--ink-soft);line-height:1.7;max-width:480px}
+.ph-coming{display:inline-block;margin-top:20px;padding:8px 18px;border-radius:var(--pill-r);background:var(--surface);border:1px solid var(--border);font-size:12px;color:var(--ink-soft)}
+
+@media(max-width:600px){.nav-links{display:none}.fr{grid-template-columns:1fr}.hero-stats{gap:20px}.modal-acts{flex-direction:column}}
+
+/* ── PHASE 2: SCHEDULE ─────────────────────────────────────────────── */
+.sched-hero{background:var(--aamea-deep);padding:36px 24px 0;text-align:center;position:relative;overflow:hidden}
+.sched-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(201,151,58,0.04) 40px,rgba(201,151,58,0.04) 41px)}
+.sched-hero-title{font-family:'Syne',sans-serif;font-size:clamp(22px,4vw,34px);font-weight:700;color:var(--white);margin:8px 0 6px}
+.day-tabs{display:flex;justify-content:center;gap:6px;padding:24px 0 0;flex-wrap:wrap;position:relative;z-index:1}
+.day-tab{padding:10px 20px;border-radius:var(--r-md) var(--r-md) 0 0;border:none;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.55);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:90px}
+.day-tab:hover{background:rgba(255,255,255,0.14);color:var(--white)}
+.day-tab.active{background:var(--surface);color:var(--aamea-deep)}
+.day-tab-date{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
+.day-tab-label{font-size:10px;letter-spacing:0.06em;text-transform:uppercase;font-weight:500}
+.day-tab.active .day-tab-date{color:var(--aamea-deep)}
+.day-tab.active .day-tab-label{color:var(--aamea-gold)}
+.sched-layout{display:grid;grid-template-columns:1fr 280px;gap:20px;padding:20px 0 48px;align-items:start}
+.sched-main{}
+.sched-sidebar{}
+.sched-filter-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.sidebar-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:18px}
+.sidebar-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--aamea-deep);margin-bottom:12px}
+.sidebar-empty{font-size:12px;color:var(--ink-faint);padding:8px 0}
+.time-block{margin-bottom:28px}
+.time-block-label{font-size:11px;font-weight:600;letter-spacing:0.08em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:10px;padding-left:4px}
+.sess-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:box-shadow 0.15s,transform 0.1s;display:flex;gap:14px;align-items:flex-start}
+.sess-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.sess-time-col{min-width:52px;text-align:right;padding-top:2px}
+.sess-time{font-size:12px;font-weight:600;color:var(--ink-soft);display:block;white-space:nowrap}
+.sess-dur{font-size:10px;color:var(--ink-faint);display:block}
+.sess-body{flex:1;min-width:0}
+.sess-track-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0;margin-top:2px}
+.sess-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;display:flex;align-items:flex-start;gap:6px}
+.sess-speakers-line{font-size:12px;color:var(--ink-soft);margin-bottom:6px}
+.sess-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sess-room{font-size:11px;color:var(--ink-faint)}
+.sess-type-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:var(--pill-r);text-transform:uppercase;letter-spacing:0.06em}
+.sess-bookmark{margin-left:auto;background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink-faint);padding:0 0 0 8px;flex-shrink:0;transition:color 0.15s;line-height:1}
+.sess-bookmark.saved{color:var(--aamea-gold)}
+.sess-bookmark:hover{color:var(--aamea-gold)}
+.spkr-mini{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity 0.15s}
+.spkr-mini:last-child{border-bottom:none;padding-bottom:0}
+.spkr-mini:hover{opacity:0.75}
+.spkr-mini-name{font-size:13px;font-weight:500;color:var(--ink)}
+.spkr-mini-role{font-size:11px;color:var(--ink-soft)}
+.my-sched-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.my-sched-item:last-child{border-bottom:none}
+.my-sched-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.my-sched-title{font-size:12px;font-weight:500;color:var(--ink);line-height:1.4}
+.my-sched-time{font-size:11px;color:var(--ink-faint)}
+.sm-spkr-row{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer;border-radius:var(--r-md);transition:background 0.15s}
+.sm-spkr-row:hover{background:var(--surface)}
+.rating-row{display:flex;gap:6px;margin-top:8px}
+.star-btn{background:none;border:none;font-size:28px;cursor:pointer;color:var(--border);transition:color 0.1s;padding:0}
+.star-btn.lit{color:var(--aamea-gold)}
+@media(max-width:700px){.sched-layout{grid-template-columns:1fr}.sched-sidebar{display:none}}
+
+
+/* ── PHASE 3: OPPORTUNITIES ────────────────────────────────────────── */
+.opp-subnav{background:var(--aamea-deep);border-bottom:1px solid rgba(255,255,255,0.1)}
+.opp-subnav-inner{display:flex;gap:4px;padding:0;overflow-x:auto}
+.opp-tab{padding:14px 18px;border:none;background:transparent;color:rgba(255,255,255,0.55);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s}
+.opp-tab:hover{color:var(--white)}
+.opp-tab.active{color:var(--aamea-gold);border-bottom-color:var(--aamea-gold)}
+.opp-panel{display:none;padding:24px 0 48px}
+.opp-panel.active{display:block}
+.opp-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.opp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.opp-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px;cursor:pointer;transition:box-shadow 0.15s,transform 0.1s}
+.opp-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.opp-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.opp-type-pill{font-size:10px;font-weight:600;padding:3px 10px;border-radius:var(--pill-r);text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0}
+.opp-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px;line-height:1.3}
+.opp-desc-preview{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.opp-card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)}
+.opp-poster{display:flex;align-items:center;gap:8px}
+.opp-poster-name{font-size:12px;font-weight:500;color:var(--ink-mid)}
+.opp-meta-pills{display:flex;gap:6px;flex-wrap:wrap}
+.opp-new-badge{background:#F0FDF4;color:#166534;font-size:10px;font-weight:600;padding:2px 8px;border-radius:var(--pill-r)}
+.opp-section-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.opp-section-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--aamea-deep);margin-bottom:4px}
+.opp-section-sub{font-size:13px;color:var(--ink-soft);max-width:520px;line-height:1.6}
+.mentors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.mentor-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px}
+.mentor-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.mentor-areas{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.mentor-area-pill{background:#EEF2FF;color:#3730A3;font-size:11px;font-weight:500;padding:3px 10px;border-radius:var(--pill-r)}
+.mentor-avail{font-size:11px;color:var(--ink-faint);margin-bottom:12px}
+.mentor-note{font-size:12px;color:var(--ink-soft);line-height:1.5;margin-bottom:12px;font-style:italic}
+.mentor-layout{display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start}
+.jv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.jv-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px;cursor:pointer;transition:box-shadow 0.15s,transform 0.1s;position:relative;overflow:hidden}
+.jv-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.jv-card-accent{position:absolute;top:0;left:0;right:0;height:3px}
+.jv-card-type{font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--aamea-gold);margin-bottom:6px}
+.jv-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.jv-desc{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.jv-members{display:flex;margin-bottom:10px}
+.jv-member-av{width:28px;height:28px;border-radius:50%;border:2px solid var(--white);margin-left:-8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.jv-member-av:first-child{margin-left:0}
+.jv-needs{display:flex;flex-wrap:wrap;gap:6px;padding-top:10px;border-top:1px solid var(--border)}
+.jv-need-pill{background:var(--surface);border:1px solid var(--border);color:var(--ink-mid);font-size:11px;padding:3px 10px;border-radius:var(--pill-r)}
+.ws-member-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ws-member-row:last-child{border-bottom:none}
+.tracker-list{display:flex;flex-direction:column;gap:10px}
+.tracker-item{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;display:flex;align-items:flex-start;gap:14px}
+.tracker-priority{width:6px;flex-shrink:0;border-radius:3px;align-self:stretch}
+.tracker-body{flex:1;min-width:0}
+.tracker-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.tracker-meta{font-size:12px;color:var(--ink-faint)}
+.tracker-actions{display:flex;gap:8px;align-items:center}
+.tracker-done-btn{background:none;border:none;cursor:pointer;font-size:18px;color:var(--ink-faint);transition:color 0.15s;padding:0}
+.tracker-done-btn:hover{color:var(--aamea-teal)}
+.tracker-empty{text-align:center;padding:48px 24px;color:var(--ink-soft)}
+.tracker-empty h3{font-size:15px;font-weight:500;color:var(--ink-mid);margin-bottom:6px}
+@media(max-width:700px){.mentor-layout{grid-template-columns:1fr}.opp-grid,.jv-grid,.mentors-grid{grid-template-columns:1fr}}
+
+/* External opportunity groups */
+.ext-opp-group{margin-bottom:36px}
+.ext-group-label{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--aamea-deep);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+
+/* ── PHASE 4: RESOURCES / EXHIBITORS / COMMUNITY ──────────────────── ──── */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.res-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:18px;display:flex;gap:14px;align-items:flex-start;cursor:pointer;transition:box-shadow 0.15s,transform 0.1s}
+.res-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.res-icon{width:44px;height:44px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.res-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;line-height:1.35}
+.res-meta{font-size:11px;color:var(--ink-soft)}
+.res-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.exh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.exh-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px;cursor:pointer;transition:box-shadow 0.15s,transform 0.1s}
+.exh-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.exh-logo{width:52px;height:52px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:12px}
+.exh-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.exh-sector{font-size:12px;color:var(--aamea-deep);font-weight:500;margin-bottom:8px}
+.exh-desc{font-size:13px;color:var(--ink-soft);line-height:1.5;margin-bottom:10px}
+.exh-booth{font-size:11px;color:var(--ink-faint)}
+.community-hero{background:var(--aamea-deep);border-radius:var(--r-xl);padding:36px 32px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden}
+.community-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(201,151,58,0.04) 40px,rgba(201,151,58,0.04) 41px)}
+.community-hero-title{font-family:'Syne',sans-serif;font-size:clamp(20px,3.5vw,28px);font-weight:700;color:var(--white);margin-bottom:10px;position:relative}
+.community-hero-sub{font-size:14px;color:rgba(255,255,255,0.6);max-width:560px;margin:0 auto;line-height:1.7;position:relative}
+.community-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:24px}
+.community-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:22px}
+.community-card-icon{font-size:26px;margin-bottom:10px}
+.community-card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--aamea-deep);margin-bottom:6px}
+.community-card-desc{font-size:13px;color:var(--ink-soft);line-height:1.6}
+.community-signup{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:28px;text-align:center}
+.community-signup-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:600;color:var(--aamea-deep);margin-bottom:6px}
+.community-signup-sub{font-size:13px;color:var(--ink-soft);margin-bottom:16px}
+
+/* LIVE POLL & Q&A */
+.poll-question{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:12px}
+.poll-option-row{margin-bottom:8px}
+.poll-option-btn{width:100%;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 14px;cursor:pointer;font-size:13px;color:var(--ink-mid);font-family:'Inter',sans-serif;position:relative;overflow:hidden;transition:border-color 0.15s}
+.poll-option-btn:hover{border-color:var(--aamea-deep)}
+.poll-option-btn.voted{border-color:var(--aamea-gold)}
+.poll-option-fill{position:absolute;top:0;left:0;bottom:0;background:#FFF7ED;z-index:0;transition:width 0.3s}
+.poll-option-content{position:relative;z-index:1;display:flex;justify-content:space-between}
+.poll-option-pct{font-weight:600;color:var(--aamea-gold)}
+.poll-total-votes{font-size:11px;color:var(--ink-faint);margin-top:6px}
+.poll-no-poll{font-size:13px;color:var(--ink-faint);text-align:center;padding:16px 0}
+.qa-input-row{display:flex;gap:8px;margin-bottom:14px}
+.qa-input-row .fi{flex:1}
+.qa-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.qa-item:last-child{border-bottom:none}
+.qa-upvote-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:6px 10px;cursor:pointer;font-size:11px;color:var(--ink-mid);display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0;transition:all 0.15s;min-width:42px}
+.qa-upvote-btn:hover{border-color:var(--aamea-gold)}
+.qa-upvote-btn.upvoted{background:#FFF7ED;border-color:var(--aamea-gold);color:var(--aamea-gold)}
+.qa-text{font-size:13px;color:var(--ink-mid);line-height:1.5}
+.qa-asker{font-size:11px;color:var(--ink-faint);margin-top:3px}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand" onclick="showView('directory')">
+    <span class="nav-dot"></span>AAMEA<span style="color:var(--aamea-gold);margin-left:2px">Interact</span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" id="nav-directory" onclick="showView('directory')">Directory</button>
+    <button class="nav-link" id="nav-schedule" onclick="showView('schedule')">Schedule</button>
+    <button class="nav-link" id="nav-opportunities" onclick="showView('opportunities')">Opportunities</button>
+    <button class="nav-link" id="nav-resources" onclick="showView('resources')">Resources</button>
+    <button class="nav-link" id="nav-profile" onclick="showView('profile')">My profile</button>
+  </div>
+  <div class="nav-avatar" id="nav-avatar" onclick="showView('profile')" title="My profile">?</div>
+</nav>
+
+<!-- LOGIN -->
+<div id="view-login" class="view active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">AAMEA<span> · </span>Interact</div>
+      <div class="login-tag">Kigali, Rwanda &nbsp;·&nbsp; 20–23 August 2026</div>
+      <div class="fg"><label class="fl">Email address</label><input type="email" class="fi" id="li-email" placeholder="you@example.com"></div>
+      <div class="fg"><label class="fl">Password</label><input type="password" class="fi" id="li-pass" placeholder="••••••••"></div>
+      <button class="fsave" onclick="handleLogin()">Sign in</button>
+      <div class="login-div">or</div>
+      <button class="fsave" style="background:var(--aamea-teal)" onclick="handleDemoLogin()">Explore in demo mode</button>
+      <div class="demo-note"><strong>Demo mode:</strong> Browse 12 sample participants, test the directory, profiles, and QR cards — no account needed. Connect Supabase later to go live.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTORY -->
+<div id="view-directory" class="view">
+  <div class="hero-band">
+    <div class="hero-eyebrow">AIESEC Alumni Middle East &amp; Africa</div>
+    <h1 class="hero-title">Reconnect. Reimagine.<br><span>Rebuild. Reignite.</span></h1>
+    <div class="hero-sub">Kigali, Rwanda &nbsp;·&nbsp; 20–23 August 2026</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-num">300+</span><span class="hero-stat-label">Delegates</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">25+</span><span class="hero-stat-label">Countries</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">4</span><span class="hero-stat-label">Days</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">50+</span><span class="hero-stat-label">Partnerships</span></div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="search-bar-wrap">
+      <div class="search-row">
+        <div class="search-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" id="srch" placeholder="Search name, organisation, country…" oninput="filterP()">
+        </div>
+        <select class="filter-sel" id="f-track" onchange="filterP()">
+          <option value="">All tracks</option>
+          <option>Career &amp; Leadership</option>
+          <option>JV / Venture Lab</option>
+          <option>Alumni Expo</option>
+          <option>Summit</option>
+          <option>Cultural</option>
+        </select>
+        <select class="filter-sel" id="f-country" onchange="filterP()"><option value="">All countries</option></select>
+        <span class="filter-count" id="f-count"></span>
+      </div>
+    </div>
+    <div class="dir-grid" id="dir-grid"></div>
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div id="view-schedule" class="view">
+  <div class="sched-hero">
+    <div class="hero-eyebrow">Programme</div>
+    <h2 class="sched-hero-title">Four days in Kigali</h2>
+    <div class="hero-sub">20–23 August 2026 &nbsp;·&nbsp; Kigali Convention Centre</div>
+    <div class="day-tabs" id="day-tabs">
+      <button class="day-tab" onclick="switchDay(-1)"><span class="day-tab-date">12–19 Aug</span><span class="day-tab-label">Pre-conf</span></button>
+      <button class="day-tab active" onclick="switchDay(0)"><span class="day-tab-date">Thu 20</span><span class="day-tab-label">Reconnect</span></button>
+      <button class="day-tab" onclick="switchDay(1)"><span class="day-tab-date">Fri 21</span><span class="day-tab-label">Venture</span></button>
+      <button class="day-tab" onclick="switchDay(2)"><span class="day-tab-date">Sat 22</span><span class="day-tab-label">Summit</span></button>
+      <button class="day-tab" onclick="switchDay(3)"><span class="day-tab-date">Sun 23</span><span class="day-tab-label">Purpose</span></button>
+      <button class="day-tab" onclick="switchDay(4)"><span class="day-tab-date">24–31 Aug</span><span class="day-tab-label">Post-conf</span></button>
+    </div>
+  </div>
+  <div class="container">
+    <div class="sched-layout">
+      <div class="sched-main">
+        <div class="sched-filter-row">
+          <select class="filter-sel" id="sched-track-filter" onchange="renderSessions()">
+            <option value="">All tracks</option>
+            <option>Plenary</option>
+            <option>Career &amp; Leadership</option>
+            <option>JV / Venture Lab</option>
+            <option>Alumni Expo</option>
+            <option>Summit</option>
+            <option>Cultural</option>
+            <option>Workshop</option>
+          </select>
+          <span id="sched-saved-count" class="filter-count"></span>
+        </div>
+        <div id="sessions-list"></div>
+      </div>
+      <div class="sched-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-title">My schedule</div>
+          <div id="my-schedule-list"><div class="sidebar-empty">Bookmark sessions to build your personal schedule.</div></div>
+        </div>
+        <div class="sidebar-card" style="margin-top:14px">
+          <div class="sidebar-title">Speakers</div>
+          <div id="speakers-mini-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OPPORTUNITIES -->
+<div id="view-opportunities" class="view">
+  <!-- SUB-NAV -->
+  <div class="opp-subnav">
+    <div class="container">
+      <div class="opp-subnav-inner">
+        <button class="opp-tab active" id="otab-board" onclick="switchOppTab('board')">Opportunities</button>
+        <button class="opp-tab" id="otab-mentors" onclick="switchOppTab('mentors')">Mentor matching</button>
+        <button class="opp-tab" id="otab-jv" onclick="switchOppTab('jv')">JV &amp; Venture Lab</button>
+        <button class="opp-tab" id="otab-tracker" onclick="switchOppTab('tracker')">My tracker</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOARD -->
+  <div id="opp-panel-board" class="opp-panel active">
+    <div class="container">
+      <div class="opp-toolbar">
+        <div class="search-wrap" style="flex:1;min-width:200px">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" id="opp-search" placeholder="Search opportunities..." oninput="filterOpps()">
+        </div>
+        <select class="filter-sel" id="opp-type-filter" onchange="filterOpps()">
+          <option value="">All types</option>
+          <option>Job</option>
+          <option>JV Proposal</option>
+          <option>Investment</option>
+          <option>Mentorship</option>
+          <option>Partnership</option>
+          <option>Co-founder</option>
+        </select>
+        <select class="filter-sel" id="opp-sector-filter" onchange="filterOpps()">
+          <option value="">All sectors</option>
+          <option>Technology</option>
+          <option>Finance</option>
+          <option>Energy</option>
+          <option>Education</option>
+          <option>Health</option>
+          <option>Agriculture</option>
+          <option>Tourism</option>
+          <option>Policy</option>
+          <option>Creative</option>
+        </select>
+        <button class="btn btn-gold" onclick="openPostOpp()">+ Post opportunity</button>
+      </div>
+      <div id="opp-grid" class="opp-grid"></div>
+
+      <!-- EXTERNAL CURATED OPPORTUNITIES -->
+      <div style="margin-top:40px;padding-top:32px;border-top:2px solid var(--border)">
+        <div class="opp-section-header">
+          <div>
+            <div class="opp-section-title">Curated external opportunities</div>
+            <div class="opp-section-sub">Fellowships, accelerators, and programmes open to AAMEA alumni across Africa, the Middle East, and beyond. Links open on the respective organisation's website.</div>
+          </div>
+          <select class="filter-sel" id="ext-type-filter" onchange="filterExtOpps()">
+            <option value="">All types</option>
+            <option>Fellowship</option>
+            <option>Accelerator</option>
+            <option>Programme</option>
+          </select>
+        </div>
+        <div id="ext-opps-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENTOR MATCHING -->
+  <div id="opp-panel-mentors" class="opp-panel">
+    <div class="container">
+      <div class="mentor-layout">
+        <div class="mentor-main">
+          <div class="opp-section-header">
+            <div>
+              <div class="opp-section-title">Available mentors</div>
+              <div class="opp-section-sub">Experienced alumni who have opted in to offer guidance. Send a request with a short note on what you are looking for.</div>
+            </div>
+            <button class="btn btn-primary" onclick="openMentorOpt()">Offer mentorship</button>
+          </div>
+          <div id="mentors-grid" class="mentors-grid"></div>
+
+          <!-- EXTERNAL MENTORSHIP PLATFORMS -->
+          <div style="margin-top:40px;padding-top:32px;border-top:2px solid var(--border)">
+            <div class="opp-section-header">
+              <div>
+                <div class="opp-section-title">Mentorship platforms</div>
+                <div class="opp-section-sub">External platforms where you can find or offer mentorship beyond the conference — free resources for ongoing professional growth.</div>
+              </div>
+            </div>
+            <div id="ext-mentor-platforms" class="mentors-grid"></div>
+          </div>
+        </div>
+        <div class="mentor-sidebar">
+          <div class="sidebar-card">
+            <div class="sidebar-title">My mentor matches</div>
+            <div id="my-matches-list"><div class="sidebar-empty">No matches yet. Send a request to a mentor above.</div></div>
+          </div>
+          <div class="sidebar-card" style="margin-top:14px">
+            <div class="sidebar-title">Organiser matching</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.6">The AAMEA team also curates mentor-mentee pairs based on your profile and goals. Complete your profile to be included in the next matching round.</div>
+            <button class="btn btn-ghost" style="width:100%;margin-top:12px" onclick="showToast('Profile submitted for organiser matching')">Submit for matching</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JV & VENTURE LAB -->
+  <div id="opp-panel-jv" class="opp-panel">
+    <div class="container">
+      <div class="opp-section-header">
+        <div>
+          <div class="opp-section-title">JV &amp; Venture Lab workspaces</div>
+          <div class="opp-section-sub">Active cross-border teams building ventures at the conference. Join a team, view their workspace, or propose a new collaboration.</div>
+        </div>
+        <button class="btn btn-gold" onclick="openNewWorkspace()">+ Propose venture</button>
+      </div>
+      <div id="jv-grid" class="jv-grid"></div>
+    </div>
+  </div>
+
+  <!-- MY TRACKER -->
+  <div id="opp-panel-tracker" class="opp-panel">
+    <div class="container">
+      <div class="opp-section-header">
+        <div>
+          <div class="opp-section-title">My opportunity tracker</div>
+          <div class="opp-section-sub">Track the opportunities, commitments, and follow-ups you have made during the conference.</div>
+        </div>
+        <button class="btn btn-primary" onclick="openAddTracker()">+ Add item</button>
+      </div>
+      <div id="tracker-list" class="tracker-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- POST OPPORTUNITY MODAL -->
+<div class="modal-overlay" id="post-opp-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="document.getElementById('post-opp-overlay').classList.remove('open')">&#x2715;</button>
+      <div class="modal-name">Post an opportunity</div>
+      <div class="modal-role" style="margin-top:4px">Visible to all conference delegates</div>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Title</label><input class="fi" id="po-title" placeholder="e.g. Co-founder needed — EdTech venture"></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Type</label>
+          <select class="fi" id="po-type">
+            <option value="">Select type</option>
+            <option>Job</option><option>JV Proposal</option><option>Investment</option>
+            <option>Mentorship</option><option>Partnership</option><option>Co-founder</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Sector</label>
+          <select class="fi" id="po-sector">
+            <option value="">Select sector</option>
+            <option>Technology</option><option>Finance</option><option>Energy</option>
+            <option>Education</option><option>Health</option><option>Agriculture</option>
+            <option>Tourism</option><option>Policy</option><option>Creative</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Countries / regions involved</label><input class="fi" id="po-countries" placeholder="e.g. Kenya, Rwanda, UAE"></div>
+      <div class="fg"><label class="fl">Description</label><textarea class="ft" id="po-desc" placeholder="What are you looking for? What do you offer? What is the opportunity?"></textarea></div>
+      <div class="fg"><label class="fl">Contact / next step</label><input class="fi" id="po-contact" placeholder="Email, LinkedIn, or Cal.com link"></div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-primary" style="flex:1" onclick="submitOpp()">Post opportunity</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('post-opp-overlay').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- OPP DETAIL MODAL -->
+<div class="modal-overlay" id="opp-detail-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="document.getElementById('opp-detail-overlay').classList.remove('open')">&#x2715;</button>
+      <div style="margin-bottom:6px"><span id="od-type-badge" class="sess-type-badge"></span></div>
+      <div class="modal-name" id="od-title"></div>
+      <div class="modal-role" style="margin-top:4px" id="od-meta"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sec"><div class="modal-sec-label">Description</div><div class="modal-bio" id="od-desc"></div></div>
+      <div class="modal-sec"><div class="modal-sec-label">Posted by</div><div class="modal-pr" id="od-poster" style="margin-top:6px"></div></div>
+      <div class="modal-sec" id="od-contact-sec"><div class="modal-sec-label">Contact</div><div id="od-contact" style="font-size:13px;color:var(--aamea-deep)"></div></div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-primary" style="flex:1" id="od-respond-btn">Express interest</button>
+      <button class="btn btn-ghost" onclick="flagOpp()">Flag</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('opp-detail-overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MENTOR OPT-IN MODAL -->
+<div class="modal-overlay" id="mentor-opt-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="document.getElementById('mentor-opt-overlay').classList.remove('open')">&#x2715;</button>
+      <div class="modal-name">Offer mentorship</div>
+      <div class="modal-role" style="margin-top:4px">You will appear in the mentor directory</div>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Areas you can mentor in</label><input class="fi" id="mo-areas" placeholder="e.g. Fundraising, market entry, team building, product"></div>
+      <div class="fg"><label class="fl">Availability during the conference</label>
+        <select class="fi" id="mo-avail">
+          <option>Day 0 evening</option><option>Day 1 afternoon</option>
+          <option>Day 2 — structured sessions</option><option>Day 3 morning</option><option>Flexible / anytime</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Max mentees</label>
+        <select class="fi" id="mo-max">
+          <option>1</option><option>2</option><option>3</option><option>4–5</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Short note for mentees</label><textarea class="ft" id="mo-note" placeholder="What kind of mentees are you best placed to help?"></textarea></div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-primary" style="flex:1" onclick="submitMentorOpt()">Join mentor directory</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('mentor-opt-overlay').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- WORKSPACE MODAL -->
+<div class="modal-overlay" id="workspace-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-hdr" id="ws-modal-hdr">
+      <button class="modal-close" onclick="document.getElementById('workspace-overlay').classList.remove('open')">&#x2715;</button>
+      <div class="modal-name" id="ws-title"></div>
+      <div class="modal-role" style="margin-top:4px" id="ws-type-tag"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sec"><div class="modal-sec-label">About this venture</div><div class="modal-bio" id="ws-desc"></div></div>
+      <div class="modal-sec">
+        <div class="modal-sec-label">Team members</div>
+        <div id="ws-members"></div>
+      </div>
+      <div class="modal-sec" id="ws-doc-sec">
+        <div class="modal-sec-label">Shared workspace</div>
+        <a id="ws-doc-link" href="#" target="_blank" class="btn btn-ghost" style="display:inline-flex">Open shared document &#8599;</a>
+      </div>
+      <div class="modal-sec">
+        <div class="modal-sec-label">Looking for</div>
+        <div id="ws-needs" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"></div>
+      </div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-primary" style="flex:1" id="ws-join-btn">Request to join team</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('workspace-overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW WORKSPACE MODAL -->
+<div class="modal-overlay" id="new-ws-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="document.getElementById('new-ws-overlay').classList.remove('open')">&#x2715;</button>
+      <div class="modal-name">Propose a venture</div>
+      <div class="modal-role" style="margin-top:4px">Create a JV or Venture Lab workspace</div>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">Venture name</label><input class="fi" id="nw-name" placeholder="e.g. AgriLink MEA"></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Type</label>
+          <select class="fi" id="nw-type">
+            <option>JV Proposal</option><option>Venture Lab</option><option>Hackathon Team</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Sector</label>
+          <select class="fi" id="nw-sector">
+            <option>Technology</option><option>Finance</option><option>Energy</option>
+            <option>Education</option><option>Health</option><option>Agriculture</option>
+            <option>Tourism</option><option>Policy</option><option>Creative</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Description</label><textarea class="ft" id="nw-desc" placeholder="What problem are you solving? What is the cross-border opportunity?"></textarea></div>
+      <div class="fg"><label class="fl">Countries involved</label><input class="fi" id="nw-countries" placeholder="e.g. Nigeria, Kenya, UAE"></div>
+      <div class="fg"><label class="fl">Looking for</label><input class="fi" id="nw-needs" placeholder="e.g. CTO, Investor, Market access partner"></div>
+      <div class="fg"><label class="fl">Shared doc link <span style="color:var(--ink-faint);font-size:11px">(Google Doc, Notion, etc.)</span></label><input class="fi" id="nw-doc" placeholder="https://..."></div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-gold" style="flex:1" onclick="submitWorkspace()">Create workspace</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('new-ws-overlay').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKER ADD MODAL -->
+<div class="modal-overlay" id="tracker-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="document.getElementById('tracker-overlay').classList.remove('open')">&#x2715;</button>
+      <div class="modal-name">Track an opportunity</div>
+      <div class="modal-role" style="margin-top:4px">Add a commitment or follow-up to your personal tracker</div>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="fl">What is it?</label><input class="fi" id="tr-title" placeholder="e.g. Follow up with Rania re: Series A intro"></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Type</label>
+          <select class="fi" id="tr-type">
+            <option>Follow-up</option><option>Commitment</option><option>Application</option>
+            <option>Introduction</option><option>Meeting</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">Priority</label>
+          <select class="fi" id="tr-priority">
+            <option>High</option><option>Medium</option><option>Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Follow-up date</label><input class="fi" type="date" id="tr-date"></div>
+      <div class="fg"><label class="fl">Notes</label><textarea class="ft" id="tr-notes" placeholder="Any context, links, or next steps..."></textarea></div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-primary" style="flex:1" onclick="addTrackerItem()">Add to tracker</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('tracker-overlay').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESOURCES / EXHIBITORS / COMMUNITY -->
+<div id="view-resources" class="view">
+  <div class="opp-subnav">
+    <div class="container">
+      <div class="opp-subnav-inner">
+        <button class="opp-tab active" id="rtab-resources" onclick="switchResTab('resources')">Resource library</button>
+        <button class="opp-tab" id="rtab-exhibitors" onclick="switchResTab('exhibitors')">Exhibitor directory</button>
+        <button class="opp-tab" id="rtab-community" onclick="switchResTab('community')">Community</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESOURCE LIBRARY -->
+  <div id="res-panel-resources" class="opp-panel active">
+    <div class="container">
+      <div class="opp-toolbar">
+        <div class="search-wrap" style="flex:1;min-width:200px">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" id="res-search" placeholder="Search resources..." oninput="filterResources()">
+        </div>
+        <select class="filter-sel" id="res-type-filter" onchange="filterResources()">
+          <option value="">All types</option>
+          <option>Slide deck</option>
+          <option>Recording</option>
+          <option>Document</option>
+          <option>Link</option>
+          <option>Toolkit</option>
+        </select>
+        <select class="filter-sel" id="res-track-filter" onchange="filterResources()">
+          <option value="">All tracks</option>
+          <option>Plenary</option>
+          <option>JV / Venture Lab</option>
+          <option>Career & Leadership</option>
+          <option>Summit</option>
+          <option>Cultural</option>
+        </select>
+      </div>
+      <div id="res-grid" class="res-grid"></div>
+    </div>
+  </div>
+
+  <!-- EXHIBITOR DIRECTORY -->
+  <div id="res-panel-exhibitors" class="opp-panel">
+    <div class="container">
+      <div class="opp-section-header">
+        <div>
+          <div class="opp-section-title">Alumni Expo exhibitors</div>
+          <div class="opp-section-sub">Startups, creative studios, and social enterprises showing at the Alumni Expo Hall. Filter by sector to find exhibitors relevant to you.</div>
+        </div>
+      </div>
+      <div class="opp-toolbar">
+        <select class="filter-sel" id="exh-sector-filter" onchange="filterExhibitors()">
+          <option value="">All sectors</option>
+          <option>Technology</option>
+          <option>Finance</option>
+          <option>Energy</option>
+          <option>Education</option>
+          <option>Health</option>
+          <option>Agriculture</option>
+          <option>Tourism</option>
+          <option>Creative</option>
+        </select>
+      </div>
+      <div id="exh-grid" class="exh-grid"></div>
+    </div>
+  </div>
+
+  <!-- COMMUNITY -->
+  <div id="res-panel-community" class="opp-panel">
+    <div class="container">
+      <div class="community-hero">
+        <div class="community-hero-title">The conference ends. AAMEA Interact does not.</div>
+        <div class="community-hero-sub">Your profile, connections, saved resources, and opportunity tracker stay with you after 23 August. This is where the 10-month follow-through programme lives.</div>
+      </div>
+      <div class="community-grid">
+        <div class="community-card">
+          <div class="community-card-icon">&#128279;</div>
+          <div class="community-card-title">Stay connected</div>
+          <div class="community-card-desc">Your directory connections remain accessible. Message, schedule follow-up calls, and keep building the relationships you started in Kigali.</div>
+        </div>
+        <div class="community-card">
+          <div class="community-card-icon">&#128202;</div>
+          <div class="community-card-title">Track outcomes</div>
+          <div class="community-card-desc">Your opportunity tracker continues to work post-conference. Country chapters will check in on commitments made during the Action Labs.</div>
+        </div>
+        <div class="community-card">
+          <div class="community-card-icon">&#127919;</div>
+          <div class="community-card-title">Action Lab follow-through</div>
+          <div class="community-card-desc">Each Action Lab group (Decent Work, Climate, Gender Equality, Education, Digital Inclusion, Peace & Cooperation, Entrepreneurship & Trade) reconvenes monthly through the 10-month programme.</div>
+        </div>
+        <div class="community-card">
+          <div class="community-card-icon">&#127760;</div>
+          <div class="community-card-title">Country chapters</div>
+          <div class="community-card-desc">Join your country or regional AIESEC Alumni chapter to stay involved in local activities between AAMEA conferences.</div>
+        </div>
+      </div>
+      <div class="community-signup">
+        <div class="community-signup-title">Join the post-conference community</div>
+        <div class="community-signup-sub">Get monthly updates on Action Lab progress, new opportunities, and the next AAMEA conference.</div>
+        <button class="btn btn-gold" onclick="showToast('You are subscribed to AAMEA Interact community updates')">Subscribe to updates</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MY PROFILE -->
+<div id="view-profile" class="view">
+  <div class="profile-wrap">
+    <div class="prof-hdr">
+      <button class="prof-edit-btn" onclick="toggleEdit()">Edit profile</button>
+      <div class="avatar" id="pa-lg" style="width:76px;height:76px;font-size:26px;margin-bottom:16px"></div>
+      <div class="prof-name" id="pd-name">Your name</div>
+      <div class="prof-role" id="pd-role">Add your job title</div>
+      <div class="prof-org" id="pd-org">Add your organisation</div>
+    </div>
+    <div class="prof-card" id="pf-card">
+      <div class="prof-sec-title">Edit your profile</div>
+      <div class="fr">
+        <div class="fg"><label class="fl">First name</label><input class="fi" id="pf-first" placeholder="First name"></div>
+        <div class="fg"><label class="fl">Last name</label><input class="fi" id="pf-last" placeholder="Last name"></div>
+      </div>
+      <div class="fg"><label class="fl">Job title</label><input class="fi" id="pf-title" placeholder="e.g. Co-founder &amp; CEO"></div>
+      <div class="fg"><label class="fl">Organisation</label><input class="fi" id="pf-org" placeholder="Company or institution"></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Country</label><input class="fi" id="pf-country" placeholder="e.g. Kenya"></div>
+        <div class="fg"><label class="fl">Track / Pillar</label>
+          <select class="fi" id="pf-track">
+            <option value="">Select track</option>
+            <option>Career &amp; Leadership</option>
+            <option>JV / Venture Lab</option>
+            <option>Alumni Expo</option>
+            <option>Summit</option>
+            <option>Cultural</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Bio <span style="color:var(--ink-faint);font-size:11px">(what you do, what you're looking for)</span></label><textarea class="ft" id="pf-bio" placeholder="A short intro for other delegates…"></textarea></div>
+      <div class="fg"><label class="fl">LinkedIn URL</label><input class="fi" id="pf-linkedin" placeholder="https://linkedin.com/in/yourname"></div>
+      <div class="fg"><label class="fl">Cal.com booking link <span style="color:var(--ink-faint);font-size:11px">(optional)</span></label><input class="fi" id="pf-cal" placeholder="https://cal.com/yourname"></div>
+      <button class="fsave" onclick="saveProfile()">Save profile</button>
+    </div>
+    <div class="prof-card">
+      <div class="prof-sec-title">Your digital business card</div>
+      <p style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">Show your QR code for instant contact exchange at the conference. Anyone who scans it goes directly to your profile.</p>
+      <button class="btn btn-primary" style="width:100%" onclick="showQR(currentUser)">View my QR card</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="m-overlay" onclick="closeMO(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="closeM()">&#x2715;</button>
+      <div class="modal-pr">
+        <div class="avatar" id="m-av" style="width:68px;height:68px;font-size:22px;border:3px solid rgba(255,255,255,0.2)"></div>
+        <div>
+          <div class="modal-name" id="m-name"></div>
+          <div class="modal-role" id="m-role"></div>
+          <div class="modal-org" id="m-org"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sec" id="m-bio-sec">
+        <div class="modal-sec-label">About</div>
+        <div class="modal-bio" id="m-bio"></div>
+      </div>
+      <div class="modal-sec">
+        <div class="modal-sec-label">Details</div>
+        <div id="m-tags" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+    </div>
+    <div class="modal-acts" id="m-acts"></div>
+  </div>
+</div>
+
+<!-- QR OVERLAY -->
+<div class="qr-overlay" id="qr-ov" onclick="closeQRO(event)">
+  <div class="qr-card" onclick="event.stopPropagation()">
+    <div class="qr-ey">AAMEA Interact &nbsp;·&nbsp; Kigali 2026</div>
+    <div class="qr-name" id="qr-name"></div>
+    <div class="qr-role" id="qr-role"></div>
+    <div class="qr-wrap"><canvas id="qr-cv" width="180" height="180"></canvas></div>
+    <div class="qr-url" id="qr-url"></div>
+    <button class="qr-close-btn" onclick="document.getElementById('qr-ov').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<!-- SESSION MODAL -->
+<div class="modal-overlay" id="sess-overlay" onclick="closeSessO(event)">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-hdr" id="sess-modal-hdr">
+      <button class="modal-close" onclick="closeSess()">&#x2715;</button>
+      <div style="margin-bottom:6px"><span class="sess-type-badge" id="sm-type"></span></div>
+      <div class="modal-name" id="sm-title"></div>
+      <div class="modal-role" style="margin-top:4px" id="sm-time-room"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sec"><div class="modal-sec-label">About this session</div><div class="modal-bio" id="sm-desc"></div></div>
+      <div class="modal-sec" id="sm-speakers-sec">
+        <div class="modal-sec-label">Speakers &amp; facilitators</div>
+        <div id="sm-speakers"></div>
+      </div>
+      <div class="modal-sec" id="sm-poll-sec">
+        <div class="modal-sec-label">Live poll</div>
+        <div id="sm-poll-body"></div>
+      </div>
+      <div class="modal-sec" id="sm-qa-sec">
+        <div class="modal-sec-label">Live Q&amp;A</div>
+        <div class="qa-input-row">
+          <input class="fi" id="qa-input" placeholder="Ask the speaker a question...">
+          <button class="btn btn-teal" onclick="submitQuestion()">Send</button>
+        </div>
+        <div id="qa-list"></div>
+      </div>
+    </div>
+    <div class="modal-acts" id="sm-acts"></div>
+  </div>
+</div>
+
+<!-- SPEAKER MODAL -->
+<div class="modal-overlay" id="spkr-overlay" onclick="closeSpkrO(event)">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="closeSpkr()">&#x2715;</button>
+      <div class="modal-pr">
+        <div class="avatar" id="spkr-av" style="width:68px;height:68px;font-size:22px;border:3px solid rgba(255,255,255,0.2)"></div>
+        <div>
+          <div class="modal-name" id="spkr-name"></div>
+          <div class="modal-role" id="spkr-role"></div>
+          <div class="modal-org" id="spkr-org"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sec"><div class="modal-sec-label">About</div><div class="modal-bio" id="spkr-bio"></div></div>
+      <div class="modal-sec"><div class="modal-sec-label">Sessions</div><div id="spkr-sessions"></div></div>
+    </div>
+    <div class="modal-acts" id="spkr-acts"></div>
+  </div>
+</div>
+
+<!-- FEEDBACK MODAL -->
+<div class="modal-overlay" id="fb-overlay" onclick="closeFbO(event)">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hdr">
+      <button class="modal-close" onclick="closeFb()">&#x2715;</button>
+      <div class="modal-name" id="fb-title"></div>
+      <div class="modal-role" style="margin-top:4px">Session feedback</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sec">
+        <div class="modal-sec-label">Overall rating</div>
+        <div class="rating-row" id="rating-stars">
+          <button class="star-btn" onclick="setRating(1)">&#9733;</button>
+          <button class="star-btn" onclick="setRating(2)">&#9733;</button>
+          <button class="star-btn" onclick="setRating(3)">&#9733;</button>
+          <button class="star-btn" onclick="setRating(4)">&#9733;</button>
+          <button class="star-btn" onclick="setRating(5)">&#9733;</button>
+        </div>
+      </div>
+      <div class="modal-sec">
+        <div class="modal-sec-label">What worked well?</div>
+        <textarea class="ft" id="fb-good" placeholder="What did you find most valuable?" style="margin-top:4px"></textarea>
+      </div>
+      <div class="modal-sec">
+        <div class="modal-sec-label">What could be improved?</div>
+        <textarea class="ft" id="fb-improve" placeholder="Any suggestions for the organisers?" style="margin-top:4px"></textarea>
+      </div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn btn-primary" style="flex:1" onclick="submitFeedback()">Submit feedback</button>
+      <button class="btn btn-ghost" onclick="closeFb()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────
+const SUPABASE_URL     = 'https://rwgrnozfwxmyyrnyufcu.supabase.co';
+const SUPABASE_ANON_KEY= 'sb_publishable_7vuB2A9M83otkaBW0m7rew_-tcWLIFu';
+const DEMO_MODE        = SUPABASE_URL === 'YOUR_SUPABASE_URL';
+let sb = null;
+if (!DEMO_MODE) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── DEMO DATA ──────────────────────────────────────────────────────────
+const DEMO = [
+  {id:1, first:'Amara',   last:'Diallo',    title:'Co-founder & CEO',       org:'Volta Energy',              country:'Senegal',       track:'JV / Venture Lab',   bio:'Building clean energy infrastructure for West Africa. Looking to connect with investors and engineering talent at the conference.'},
+  {id:2, first:'Nadia',   last:'El Fassi',  title:'Regional Director',      org:'UNDP Africa',               country:'Morocco',       track:'Summit',             bio:'Development practitioner focused on youth employment and digital skills across MEA. AIESEC alumna, class of 2011.'},
+  {id:3, first:'Kofi',    last:'Mensah',    title:'CTO',                    org:'PayStack Alumni Network',   country:'Ghana',         track:'Alumni Expo',        bio:'Fintech engineer. Former AIESEC VP. Building payment rails for underserved communities across Africa.'},
+  {id:4, first:'Rania',   last:'Khalil',    title:'Venture Partner',        org:'Sawari Ventures',           country:'Egypt',         track:'JV / Venture Lab',   bio:'Early-stage investor focused on EdTech, HealthTech, and climate. Always open to great founders.'},
+  {id:5, first:'Tendai',  last:'Mwangi',    title:'Head of Policy',         org:'Rwanda Development Board',  country:'Rwanda',        track:'Summit',             bio:'Economic policy and trade facilitation. Proud host of AAMEA 2026 in Kigali — excited to welcome you all.'},
+  {id:6, first:'Layla',   last:'Hassan',    title:'Founder',                org:'EduBridge Africa',          country:'Kenya',         track:'Career & Leadership', bio:'Connecting African graduates with global employers. AIESEC alumna 2014. Mentor and advocate for young talent.'},
+  {id:7, first:'Omar',    last:'Benhaddou', title:'Architect & Urban Planner',org:'Studio Benhaddou',        country:'Tunisia',       track:'Alumni Expo',        bio:'Sustainable urban design for rapidly growing African cities. Currently working on climate-resilient housing projects.'},
+  {id:8, first:'Grace',   last:'Osei',      title:'Executive Director',     org:'AfriLead Foundation',       country:'Nigeria',       track:'Career & Leadership', bio:'Leadership development and women in tech. Running workshops on 21st-century skills throughout the conference.'},
+  {id:9, first:'Yusuf',   last:'Al-Rashid', title:'Chief Innovation Officer',org:'Dubai Future Foundation', country:'UAE',           track:'Summit',             bio:'Connecting Gulf innovation ecosystems with Africa. Deeply interested in AI governance and digital sovereignty.'},
+  {id:10,first:'Chloe',   last:'Mvubu',     title:'Data Scientist',         org:'Insight Analytics',         country:'South Africa',  track:'Alumni Expo',        bio:'Building data infrastructure for African SMEs. Looking for JV partners in the healthcare and agriculture sectors.'},
+  {id:11,first:'Ibrahim', last:'Toure',     title:'Entrepreneur in Residence',org:'IFC',                    country:"Cote d'Ivoire", track:'JV / Venture Lab',   bio:"Supporting startups from ideation to Series A across Francophone Africa. Let's build something together."},
+  {id:12,first:'Fatima',  last:'Zahra',     title:'Sustainability Lead',    org:'OCP Group',                 country:'Morocco',       track:'Summit',             bio:"Green transition and circular economy in agribusiness. Passionate about Africa's role in the global climate agenda."},
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let allP = [];
+let currentUser = {id:'me',first:'You',last:'',title:'',org:'',country:'',track:'',bio:'',linkedin:'',cal_link:''};
+
+// ── AVATAR ─────────────────────────────────────────────────────────────
+const PALS = [
+  {bg:'#1A2B5E',fg:'#C9973A'},{bg:'#1B7B6E',fg:'#ffffff'},
+  {bg:'#C9973A',fg:'#1A2B5E'},{bg:'#C0472F',fg:'#ffffff'},
+  {bg:'#2D3F6B',fg:'#9EC8B9'},{bg:'#5B4A2E',fg:'#E8C97A'},
+];
+function pal(n){ let h=0; for(let c of n) h=(h*31+c.charCodeAt(0))&0xffff; return PALS[h%PALS.length]; }
+function ini(p){ return ((p.first||'?')[0]+(p.last||' ')[0]).toUpperCase(); }
+function setAv(el,p,size=48){
+  const pl=pal(p.first+(p.last||''));
+  el.style.cssText+=`;width:${size}px;height:${size}px;background:${pl.bg};color:${pl.fg};font-size:${Math.round(size*0.33)}px`;
+  el.textContent=ini(p);
+}
+
+// ── TRACK COLOURS ──────────────────────────────────────────────────────
+const TC={'Career & Leadership':'#166534','JV / Venture Lab':'#1A2B5E','Alumni Expo':'#9A3412','Summit':'#6B21A8','Cultural':'#0E7490'};
+function tc(t){return TC[t]||'#6B7280'}
+
+// ── VIEWS ──────────────────────────────────────────────────────────────
+function showView(n){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('view-'+n).classList.add('active');
+  const nl=document.getElementById('nav-'+n); if(nl) nl.classList.add('active');
+  if(n==='profile') renderProfile();
+  if(n==='schedule'){ renderSessions(); renderSpeakersSidebar(); }
+  if(n==='opportunities'){ renderOpps(); renderExtOpps(); }
+  if(n==='resources'){ renderResources(); }
+}
+
+// ── AUTH ───────────────────────────────────────────────────────────────
+function handleDemoLogin(){
+  allP=DEMO; renderDir(); buildCountryFilter(); updateNavAv();
+  showView('directory'); showToast('Welcome to AAMEA Interact');
+}
+function handleLogin(){
+  if(DEMO_MODE){handleDemoLogin();return;}
+  const email=document.getElementById('li-email').value.trim();
+  const pass=document.getElementById('li-pass').value;
+  if(!email||!pass){showToast('Enter your email and password');return;}
+  sb.auth.signInWithPassword({email,password:pass}).then(({error})=>{
+    if(error){showToast('Sign in failed: '+error.message);return;}
+    loadP(); showView('directory');
+  });
+}
+
+// ── DIRECTORY ──────────────────────────────────────────────────────────
+function renderDir(list){
+  const g=document.getElementById('dir-grid');
+  const ps=list||allP;
+  document.getElementById('f-count').textContent=ps.length+' participant'+(ps.length!==1?'s':'');
+  if(!ps.length){
+    g.innerHTML='<div class="empty" style="grid-column:1/-1"><h3>No results</h3><p>Try a different search or filter.</p></div>';
+    return;
+  }
+  g.innerHTML=ps.map(p=>{
+    const pl=pal(p.first+(p.last||''));
+    window['_p'+p.id]=p;
+    return `<div class="p-card" onclick="openM(${p.id})">
+      <div class="p-track-bar" style="background:${tc(p.track)}"></div>
+      <div class="p-header">
+        <div class="avatar" style="width:48px;height:48px;font-size:16px;background:${pl.bg};color:${pl.fg}">${ini(p)}</div>
+        <div>
+          <div class="p-name">${p.first} ${p.last}</div>
+          <div class="p-title-line">${p.title||''}</div>
+          <div class="p-org-line">${p.org||''}</div>
+        </div>
+      </div>
+      <div class="p-meta">
+        ${p.country?`<span class="pill pill-c">&#127758; ${p.country}</span>`:''}
+        ${p.track?`<span class="pill pill-t">${p.track}</span>`:''}
+      </div>
+      <div class="p-actions">
+        <button class="btn btn-primary" onclick="event.stopPropagation();openM(${p.id})">View profile</button>
+        <button class="btn btn-ghost" onclick="event.stopPropagation();showQR(window['_p${p.id}'])" title="QR card" style="flex:0;padding:7px 12px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h1v1h-1zM18 14h1v1h-1zM14 18h1v1h-1zM18 18h1v1h-1z" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterP(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  const tr=document.getElementById('f-track').value;
+  const co=document.getElementById('f-country').value;
+  renderDir(allP.filter(p=>{
+    const t=`${p.first} ${p.last} ${p.org} ${p.country}`.toLowerCase();
+    return(!q||t.includes(q))&&(!tr||p.track===tr)&&(!co||p.country===co);
+  }));
+}
+
+function buildCountryFilter(){
+  const countries=[...new Set(allP.map(p=>p.country).filter(Boolean))].sort();
+  const s=document.getElementById('f-country');
+  s.innerHTML='<option value="">All countries</option>'+countries.map(c=>`<option>${c}</option>`).join('');
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────
+function openM(id){
+  const p=allP.find(x=>x.id===id); if(!p) return;
+  const pl=pal(p.first+(p.last||''));
+  const av=document.getElementById('m-av');
+  av.style.background=pl.bg; av.style.color=pl.fg; av.textContent=ini(p);
+  document.getElementById('m-name').textContent=p.first+' '+p.last;
+  document.getElementById('m-role').textContent=p.title||'';
+  document.getElementById('m-org').textContent=p.org||'';
+  const bs=document.getElementById('m-bio-sec');
+  if(p.bio){document.getElementById('m-bio').textContent=p.bio;bs.style.display='block';}
+  else bs.style.display='none';
+  document.getElementById('m-tags').innerHTML=[
+    p.country?`<span class="pill pill-c">&#127758; ${p.country}</span>`:'',
+    p.track?`<span class="pill pill-t">${p.track}</span>`:'',
+  ].join('');
+  document.getElementById('m-acts').innerHTML=`
+    <button class="btn btn-primary" onclick="showQR(window['_p${p.id}'])">QR card</button>
+    ${p.linkedin?`<a class="btn btn-ghost" href="${p.linkedin}" target="_blank">LinkedIn &#8599;</a>`:''}
+    ${p.cal_link?`<a class="btn btn-teal" href="${p.cal_link}" target="_blank">Book a meeting</a>`:''}
+    <button class="btn btn-ghost" onclick="showToast('Connection request sent to ${p.first}!')">Connect</button>
+  `;
+  document.getElementById('m-overlay').classList.add('open');
+}
+function closeMO(e){if(e.target===document.getElementById('m-overlay'))closeM();}
+function closeM(){document.getElementById('m-overlay').classList.remove('open');}
+
+// ── QR ─────────────────────────────────────────────────────────────────
+function showQR(p){
+  if(!p||typeof p!=='object') return;
+  document.getElementById('qr-name').textContent=p.first+' '+p.last;
+  document.getElementById('qr-role').textContent=[p.title,p.org].filter(Boolean).join(' · ');
+  const url=`${location.origin}${location.pathname}?delegate=${p.id}`;
+  document.getElementById('qr-url').textContent=url;
+  document.getElementById('qr-ov').classList.add('open');
+  QRCode.toCanvas(document.getElementById('qr-cv'),url,{width:180,margin:1,color:{dark:'#1A2B5E',light:'#F9FAFB'}},e=>{if(e)console.warn(e);});
+}
+function closeQRO(e){if(e.target===document.getElementById('qr-ov'))document.getElementById('qr-ov').classList.remove('open');}
+
+// ── PROFILE ────────────────────────────────────────────────────────────
+function renderProfile(){
+  const p=currentUser;
+  setAv(document.getElementById('pa-lg'),p,76);
+  document.getElementById('pd-name').textContent=p.first+' '+(p.last||'');
+  document.getElementById('pd-role').textContent=p.title||'Add your job title';
+  document.getElementById('pd-org').textContent=p.org||'Add your organisation';
+  document.getElementById('pf-first').value=p.first||'';
+  document.getElementById('pf-last').value=p.last||'';
+  document.getElementById('pf-title').value=p.title||'';
+  document.getElementById('pf-org').value=p.org||'';
+  document.getElementById('pf-country').value=p.country||'';
+  document.getElementById('pf-bio').value=p.bio||'';
+  document.getElementById('pf-linkedin').value=p.linkedin||'';
+  document.getElementById('pf-cal').value=p.cal_link||'';
+  const ts=document.getElementById('pf-track');
+  for(let o of ts.options) o.selected=(o.value===p.track);
+}
+
+let editOpen=true;
+function toggleEdit(){
+  editOpen=!editOpen;
+  document.getElementById('pf-card').style.display=editOpen?'block':'none';
+}
+
+function saveProfile(){
+  currentUser.first=document.getElementById('pf-first').value.trim()||'You';
+  currentUser.last=document.getElementById('pf-last').value.trim();
+  currentUser.title=document.getElementById('pf-title').value.trim();
+  currentUser.org=document.getElementById('pf-org').value.trim();
+  currentUser.country=document.getElementById('pf-country').value.trim();
+  currentUser.track=document.getElementById('pf-track').value;
+  currentUser.bio=document.getElementById('pf-bio').value.trim();
+  currentUser.linkedin=document.getElementById('pf-linkedin').value.trim();
+  currentUser.cal_link=document.getElementById('pf-cal').value.trim();
+  if(!DEMO_MODE&&sb){
+    sb.from('participants').upsert({...currentUser}).then(({error})=>{
+      if(error) showToast('Save error: '+error.message);
+      else showToast('Profile saved');
+    });
+  } else { showToast('Profile saved'); }
+  updateNavAv(); renderProfile();
+}
+
+function updateNavAv(){
+  const el=document.getElementById('nav-avatar');
+  const pl=pal(currentUser.first+(currentUser.last||''));
+  el.style.background=pl.bg; el.style.color=pl.fg; el.textContent=ini(currentUser);
+}
+
+// ── SUPABASE LOAD ──────────────────────────────────────────────────────
+async function loadP(){
+  if(DEMO_MODE){allP=DEMO;renderDir();buildCountryFilter();return;}
+  const{data,error}=await sb.from('participants').select('*');
+  allP=error?DEMO:data; renderDir(); buildCountryFilter();
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+
+// ── PHASE 2: SCHEDULE DATA ──────────────────────────────────────────
+const SPEAKERS = [
+  {id:'s1',first:'Eteba Komi',last:'Atsou',title:'President',org:'AIESEC Alumni MEA',country:'Togo',bio:'President of AIESEC Alumni Middle East & Africa for term 2025-2028. Leading the vision for a connected, impactful alumni network of 100,000+ across 25 countries.'},
+  {id:'s2',first:'Government',last:'Representative',title:'Minister / Deputy Minister',org:'Republic of Rwanda',country:'Rwanda',bio:'Senior government representative covering ICT, Innovation, Labour, Youth, or Education. To be confirmed closer to the conference.'},
+  {id:'s3',first:'Rwanda',last:'Private Sector',title:'Business Leader',org:'Rwanda Chamber of Commerce',country:'Rwanda',bio:'A leading voice from Rwanda\'s private sector, speaking to the country\'s transformation and investment opportunities for the MEA alumni community.'},
+  {id:'s4',first:'Young',last:'Innovator',title:'Entrepreneur & Young Leader',org:'TBC',country:'Rwanda',bio:'A young Rwandan innovator or entrepreneur who will share their story and respond to the summit\'s opening conversation on leadership and the future economy.'},
+  {id:'s5',first:'Venture',last:'Mentor',title:'Investor & Startup Advisor',org:'Pan-African VC',country:'MEA',bio:'An experienced investor and mentor guiding JV Lab teams through business modelling, capital strategy, and cross-border expansion. Profile to be confirmed.'},
+  {id:'s6',first:'AfCFTA',last:'Expert',title:'Trade & Policy Specialist',org:'African Union',country:'MEA',bio:'Specialist in cross-border trade, AfCFTA implementation, and regional market access — guiding participants through the opportunities and practicalities of pan-African commerce.'},
+  {id:'s7',first:'AI',last:'Practitioner',title:'Technology Leader',org:'AI Startup / Tech Company',country:'MEA',bio:'A hands-on AI practitioner leading the AI for Real Work summit track, running live demonstrations of AI tools applied to practical business challenges.'},
+  {id:'s8',first:'Odoo',last:'Partner',title:'Enterprise Technology Expert',org:'Odoo / Partner',country:'MEA',bio:'Demonstrating how SMEs and growing businesses can digitise operations, from ERP and CRM to digital payments and data-driven decision-making.'},
+];
+
+const SESSIONS = [
+  // ── PRE-CONFERENCE: 12–19 Aug ──────────────────────────────────────
+  {id:0,day:-1,start:'12 Aug',end:'19 Aug',title:'Curated East Africa & Rwanda Experiences',type:'Pre-Conference',track:'Cultural',room:'Various locations',desc:'Optional experiences selected during registration: Kigali city and innovation ecosystem tour, Kigali history and culture, Akagera safari, Lake Kivu retreat, gorilla trekking, Uganda extension, entrepreneurship ecosystem tour, and community/social-impact visits.',speakers:[],duration:0},
+  {id:1,day:-1,start:'12 Aug',end:'19 Aug',title:'Business & Innovation Delegation',type:'Pre-Conference',track:'JV / Venture Lab',room:'Kigali Ecosystem',desc:'A specialised pre-conference delegation for investors, founders, and corporate participants. Visits to innovation hubs, tech companies, startup campuses, government investment agencies, financial institutions, and universities — entering the main conference with firsthand knowledge of Rwanda\'s ecosystem.',speakers:[],duration:0},
+
+  // ── DAY 0: Thu 20 Aug — Reconnect, Orient & Activate ──────────────
+  {id:100,day:0,start:'08:00',end:'14:00',title:'Delegate Arrivals & Registration',type:'Logistics',track:'',room:'Main Lobby',desc:'Collect your conference pack, badge, and AAMEA Interact QR card. Expo and pavilion setup underway. Optional Kigali orientation activities available.',speakers:[],duration:360},
+  {id:101,day:0,start:'10:00',end:'13:00',title:'Country & Regional Delegation Meetings',type:'Workshop',track:'Career & Leadership',room:'Breakout Rooms',desc:'Country and regional delegations convene to align on representation, priorities, and the contributions each group will make during the conference.',speakers:[],duration:180},
+  {id:102,day:0,start:'13:00',end:'15:00',title:'JV Lab Team Check-in & Hackathon Onboarding',type:'Workshop',track:'JV / Venture Lab',room:'Innovation Studio',desc:'JV Lab and hackathon teams meet for the first time, confirm team compositions, and receive their challenge briefs and facilitator introductions.',speakers:['s5'],duration:120},
+  {id:103,day:0,start:'15:00',end:'17:00',title:'Facilitator & Speaker Briefing',type:'Logistics',track:'',room:'Green Room',desc:'All speakers, facilitators, and session leads receive their final briefings, run through logistics, and prepare for the opening plenary.',speakers:['s1'],duration:120},
+  {id:104,day:0,start:'17:30',end:'19:30',title:'Opening Plenary — Once an AIESECer, Always an AIESECer',type:'Plenary',track:'Plenary',room:'Main Hall',desc:'The conference opens with the distinctly AIESEC spirit: roll calls and country recognition, conference purpose and expected outcomes, alumni stories, introduction of the conference challenges, explanation of how to access jobs, partnerships, ventures and mentorship through the platform, launch of the digital conference platform, and introduction of JV Lab and hackathon teams.',speakers:['s1'],duration:120},
+  {id:105,day:0,start:'19:30',end:'20:30',title:'Featured Session — Rwanda 2050: Leadership, Innovation and the Future We Are Building',type:'Plenary',track:'Plenary',room:'Main Hall',desc:'A curated panel featuring a government representative, a Rwandan business leader, a young innovator, an AIESEC alumnus, and a regional development expert discussing Rwanda\'s trajectory and what it means for the MEA alumni community.',speakers:['s2','s3','s4'],duration:60},
+  {id:106,day:0,start:'20:30',end:'22:30',title:'Welcome & Human Connections Evening',type:'Social',track:'',room:'Networking Hall',desc:'Facilitated networking using sector tables, country connections, founder and investor introductions, career matching, and participant "What I can offer / What I need" cards. Structured to create real connections rather than passive cocktail mingling.',speakers:[],duration:120},
+
+  // ── DAY 1: Fri 21 Aug — Build, Trade & Venture ────────────────────
+  {id:200,day:1,start:'08:00',end:'09:00',title:'Breakfast & Platform Onboarding',type:'Logistics',track:'',room:'Dining Hall',desc:'Breakfast for all delegates. Platform support desk open for anyone who needs help setting up their AAMEA Interact profile and QR business card.',speakers:[],duration:60},
+  {id:201,day:1,start:'09:00',end:'11:00',title:'Morning Plenary — From Networks to Markets: Building Cross-Border Businesses in MEA',type:'Plenary',track:'Plenary',room:'Main Hall',desc:'A moderated market-entry masterclass covering: starting and structuring a venture, understanding angels/VC/PE and exits, business development and customer acquisition, AfCFTA and regional market access, establishing a business in Rwanda, the investment environment, and navigating legal, tax, and regulatory requirements. Structured as expert inputs, not six unrelated keynotes.',speakers:['s5','s6','s3'],duration:120},
+  {id:202,day:1,start:'11:15',end:'13:00',title:'Track 1 — Starting & Structuring a Venture',type:'Workshop',track:'JV / Venture Lab',room:'Room A',desc:'Participants develop: problem statement, customer profile, value proposition, revenue model, and founding-team structure. Hands-on working session with facilitators.',speakers:['s5'],duration:105},
+  {id:203,day:1,start:'11:15',end:'13:00',title:'Track 2 — Capital & Investment',type:'Workshop',track:'JV / Venture Lab',room:'Room B',desc:'Participants learn to determine whether they need grants, debt, equity, or customer revenue; what investors expect; how valuation and dilution work; how to prepare for due diligence; and what a realistic exit means.',speakers:['s5'],duration:105},
+  {id:204,day:1,start:'11:15',end:'13:00',title:'Track 3 — Cross-Border Expansion & AfCFTA',type:'Workshop',track:'JV / Venture Lab',room:'Room C',desc:'Participants work through target-market selection, trade requirements, payment and currency challenges, local partnerships, distribution, regulatory risk, and regional expansion sequencing.',speakers:['s6'],duration:105},
+  {id:205,day:1,start:'11:15',end:'13:00',title:'Track 4 — Doing Business in Rwanda',type:'Workshop',track:'JV / Venture Lab',room:'Room D',desc:'Led by government, investment, legal, tax, and ecosystem representatives. Participants leave with registration steps, indicative timelines and costs, relevant government contacts, investment incentives, employment considerations, and local partnership opportunities.',speakers:['s2','s3'],duration:105},
+  {id:206,day:1,start:'13:00',end:'14:00',title:'Lunch',type:'Social',track:'',room:'Dining Hall',desc:'Lunch for all delegates. Startup demonstrations and alumni services marketplace running in the expo hall.',speakers:[],duration:60},
+  {id:207,day:1,start:'14:00',end:'17:00',title:'JV Lab Working Session',type:'Workshop',track:'JV / Venture Lab',room:'Innovation Studio',desc:'Facilitators guide teams through: problem validation, customer definition, business model, regional value proposition, team responsibilities, first-market selection, and 90-day launch plan. Teams organised by business opportunity and complementary capability rather than geography alone.',speakers:['s5','s6'],duration:180},
+  {id:208,day:1,start:'14:00',end:'17:00',title:'Hackathon Build Session',type:'Workshop',track:'Summit',room:'Tech Hub',desc:'Hackathon teams work on their solutions with technical mentors available throughout. Concept validation checkpoint at 16:00.',speakers:[],duration:180},
+  {id:209,day:1,start:'14:00',end:'17:00',title:'Investor & Founder Office Hours',type:'Workshop',track:'JV / Venture Lab',room:'Boardroom',desc:'One-on-one and small group meetings between founders seeking capital or advice and investors/mentors available by appointment. Book your slot on the platform.',speakers:['s5'],duration:180},
+  {id:210,day:1,start:'14:00',end:'17:00',title:'Business-to-Business Matchmaking',type:'Workshop',track:'Career & Leadership',room:'Matchmaking Lounge',desc:'Structured B2B meetings pre-arranged through the platform. Bring your opportunity cards and conversation starters.',speakers:[],duration:180},
+  {id:211,day:1,start:'19:00',end:'22:00',title:'Kigali Innovation Ecosystem Networking Night',type:'Social',track:'Cultural',room:'Offsite — Kigali Venue',desc:'Hosted at a prominent startup, innovation, or creative venue in Kigali. Startup lightning pitches, product demonstrations, investor introductions, Rwandan founder stories, and curated networking tables.',speakers:[],duration:180},
+
+  // ── DAY 2: Sat 22 Aug — Future of Work & Innovation Summit ────────
+  {id:300,day:2,start:'07:30',end:'09:00',title:'Summit Registration & Breakfast',type:'Logistics',track:'',room:'Summit Foyer',desc:'Registration for all Summit attendees, including 1,000+ external participants. Conference delegates have priority access. Expo hall and demonstration zones open.',speakers:[],duration:90},
+  {id:301,day:2,start:'09:00',end:'10:30',title:'Summit Opening — Human Leadership in an AI-Powered Economy',type:'Plenary',track:'Summit',room:'Main Hall',desc:'Government keynote (ICT / Innovation / Labour / Youth / Education ministry), AAMEA leadership address, Rwanda private-sector perspective, and a young leader or entrepreneur response. Setting the tone for a day focused on the intersection of technology and human leadership.',speakers:['s1','s2','s3','s4'],duration:90},
+  {id:302,day:2,start:'10:45',end:'12:15',title:'Plenary 1 — The Future of Work: What Will Change and What Must Remain Human?',type:'Plenary',track:'Summit',room:'Main Hall',desc:'AI and workforce transformation, jobs likely to emerge, skills employers will require, ethical use of technology, human connection and leadership, and inclusion in the digital economy.',speakers:['s7','s2'],duration:90},
+  {id:303,day:2,start:'12:15',end:'13:15',title:'Plenary 2 — Leadership Beyond the Buzzwords',type:'Plenary',track:'Summit',room:'Main Hall',desc:'Leading hybrid and distributed teams, building high-performance cultures, values-based leadership, entrepreneurship as leadership, and leading across countries and cultures.',speakers:['s8','s3'],duration:60},
+  {id:304,day:2,start:'13:15',end:'14:15',title:'Lunch & Expo',type:'Social',track:'',room:'Summit Garden',desc:'Lunch open to all Summit and conference attendees. Startup exhibition, innovation showcase, and recruitment desks running in the expo area.',speakers:[],duration:60},
+  {id:305,day:2,start:'14:15',end:'16:00',title:'Track A — AI for Real Work',type:'Workshop',track:'Summit',room:'Innovation Lab',desc:'Participants use AI tools to complete practical business tasks: market research, proposal development, customer communication, data analysis, recruitment, operations automation, and content development. Live demonstrations and guided exercises led by AI experts and startups.',speakers:['s7'],duration:105},
+  {id:306,day:2,start:'14:15',end:'16:00',title:'Track B — Career Acceleration',type:'Workshop',track:'Career & Leadership',room:'Career Pavilion',desc:'Speed hiring, employer presentations, interview rooms, career clinics, leadership mentoring, and remote-work opportunities. Bring your CV and your ambitions.',speakers:[],duration:105},
+  {id:307,day:2,start:'14:15',end:'16:00',title:'Track C — Enterprise Technology',type:'Workshop',track:'Summit',room:'Tech Studio',desc:'Digitising SME operations, ERP and workflow systems, CRM, digital payments, cybersecurity, and data-driven decision-making. Sessions featuring Odoo and partner platforms.',speakers:['s8'],duration:105},
+  {id:308,day:2,start:'14:15',end:'16:00',title:'Track D — Tourism, Hospitality & Mobility',type:'Workshop',track:'Alumni Expo',room:'Room E',desc:'Regional tourism, business travel, digital travel platforms, cross-border mobility, sustainable tourism, and investment opportunities in hospitality — led by travel agencies and tourism organisations.',speakers:[],duration:105},
+  {id:309,day:2,start:'14:15',end:'16:00',title:'Track E — Policy & Youth',type:'Workshop',track:'Summit',room:'Room F',desc:'Government, private-sector, and youth representatives address: youth employment, digital public infrastructure, skills development, entrepreneurship policy, access to finance, and regional labour mobility.',speakers:['s2','s4'],duration:105},
+  {id:310,day:2,start:'16:15',end:'17:30',title:'Summit Finals — Hackathon, JV Lab & Partnership Signings',type:'Plenary',track:'Summit',room:'Main Hall',desc:'Hackathon final presentations, JV Lab finalist pitches, AI and technology startup demonstrations, employer and opportunity announcements, and partnership signings.',speakers:['s1','s5'],duration:75},
+  {id:311,day:2,start:'17:30',end:'18:30',title:'Job Fair & Speed Interviews',type:'Exhibition',track:'Career & Leadership',room:'Career Pavilion',desc:'Final job fair session and speed interview round. Employers, candidates, and recruitment desks. Business matchmaking tables running alongside.',speakers:[],duration:60},
+  {id:312,day:2,start:'19:30',end:'23:00',title:'AAMEA Gala Night',type:'Social',track:'Cultural',room:'Grand Ballroom',desc:'Recognition of distinguished alumni, conference partner recognition, Venture Lab and Hackathon awards, cultural performances, fundraising or pledge moment, and announcement of the 10-month follow-through programme.',speakers:['s1'],duration:210},
+
+  // ── DAY 3: Sun 23 Aug — Purpose, Africa & the World ───────────────
+  {id:400,day:3,start:'08:00',end:'09:00',title:'Breakfast',type:'Logistics',track:'',room:'Dining Hall',desc:'Final conference morning breakfast for all delegates.',speakers:[],duration:60},
+  {id:401,day:3,start:'09:00',end:'10:30',title:'Morning Plenary — Africa We Want: From Agenda 2063 to Action',type:'Plenary',track:'Plenary',room:'Main Hall',desc:'Speakers translate Agenda 2063 and the SDGs into opportunities and responsibilities for entrepreneurs, employers, investors, alumni associations, professionals, young leaders, and diaspora communities. Deliberately practical rather than policy-oriented.',speakers:['s1','s6','s2'],duration:90},
+  {id:402,day:3,start:'10:30',end:'12:00',title:'Embassy & International Cooperation Forum',type:'Plenary',track:'Plenary',room:'Diplomacy Hall',desc:'African embassies and high commissions, Middle Eastern diplomatic missions, development partners, trade and investment agencies, regional economic communities, and international business councils. Focus: market-entry opportunities, trade programmes, scholarships, mobility, cultural diplomacy, and diaspora engagement.',speakers:[],duration:90},
+  {id:403,day:3,start:'10:30',end:'12:00',title:'Action Labs — Six Challenge Areas',type:'Workshop',track:'Career & Leadership',room:'Breakout Rooms',desc:'Participants self-select one challenge area: decent work and youth employment, climate action, gender equality, education and skills, digital inclusion, peace and regional cooperation, or entrepreneurship and trade. Each group produces one measurable objective, named responsible alumni, countries involved, first 90-day actions, potential partners, and a review date.',speakers:[],duration:90},
+  {id:404,day:3,start:'12:00',end:'13:00',title:'Lunch',type:'Social',track:'',room:'Dining Hall',desc:'Final conference lunch. Last opportunity for meetings, exchanges, and follow-up conversations before the closing session.',speakers:[],duration:60},
+  {id:405,day:3,start:'13:00',end:'14:30',title:'JV Lab Final Pitch & Commitment Session',type:'Plenary',track:'JV / Venture Lab',room:'Main Hall',desc:'The top three ventures present: the problem, proposed solution, cross-border advantage, founding team, 90-day roadmap, and support required. The audience pledges mentorship, introductions, technical assistance, market access, pilot opportunities, and funding consideration.',speakers:['s1','s5'],duration:90},
+  {id:406,day:3,start:'14:30',end:'16:00',title:'Closing Plenary — Reconnect. Reimagine. Rebuild. Reignite.',type:'Plenary',track:'Plenary',room:'Main Hall',desc:'Summary of actual conference results: jobs and interviews generated, ventures developed, partnerships initiated, hackathon solutions produced, mentorship matches, country commitments. Handover to the post-conference implementation team. Recognition of volunteers, speakers, facilitators, and partners.',speakers:['s1'],duration:90},
+  {id:407,day:3,start:'17:00',end:'22:00',title:'Global Village & Cultural Night — Closing Celebration',type:'Cultural',track:'Cultural',room:'Outdoor Pavilion & Grand Ballroom',desc:'The Global Village becomes the celebratory conclusion: country exhibitions, food and cultural displays, music and performances, alumni storytelling, regional showcases, and informal closing celebration.',speakers:[],duration:300},
+  {id:408,day:3,start:'14:30',end:'16:00',title:'Optional: Kigali City Tour (Early Departures)',type:'Cultural',track:'Cultural',room:'Departs Main Lobby',desc:'A short Kigali city experience for participants departing early. Available alongside the closing plenary for those who have seen it.',speakers:[],duration:90},
+
+  // ── POST-CONFERENCE: 24–31 Aug ─────────────────────────────────────
+  {id:500,day:4,start:'24 Aug',end:'31 Aug',title:'Kigali City Experience',type:'Pre-Conference',track:'Cultural',room:'Kigali',desc:'A curated Kigali city experience including the Genocide Memorial, Kimironko Market, Kigali Innovation City, and the Kigali Convention Centre area. Also available as a shorter afternoon option on Day 3 for participants departing early.',speakers:[],duration:0},
+  {id:501,day:4,start:'24 Aug',end:'31 Aug',title:'Akagera National Park Safari',type:'Pre-Conference',track:'Cultural',room:'Eastern Rwanda',desc:"Rwanda's only savannah national park — big five game drives, boat safaris on Lake Ihema, and night drives. Approximately 3 hours from Kigali. 1-2 day packages available.",speakers:[],duration:0},
+  {id:502,day:4,start:'24 Aug',end:'31 Aug',title:'Lake Kivu Retreat',type:'Pre-Conference',track:'Cultural',room:'Western Rwanda',desc:"Rwanda's great lake on the Congo border. Options include Rubavu (Gisenyi), Karongi (Kibuye), and Rusizi. Beach retreats, boat trips, and scenic highland drives.",speakers:[],duration:0},
+  {id:503,day:4,start:'24 Aug',end:'31 Aug',title:'Musanze & Volcanoes Region',type:'Pre-Conference',track:'Cultural',room:'Northern Rwanda',desc:'The gateway to the Virunga Volcanoes. Options include gorilla trekking, golden monkey tracking, Dian Fossey Tomb hike, and twin lakes (Burera & Ruhondo). Approximately 2.5 hours from Kigali.',speakers:[],duration:0},
+  {id:504,day:4,start:'24 Aug',end:'31 Aug',title:'Nyungwe Forest',type:'Pre-Conference',track:'Cultural',room:'Southern Rwanda',desc:"One of Africa's oldest rainforests. Chimpanzee trekking, canopy walkway, colobus monkey habituations, and birdwatching. Approximately 5 hours from Kigali.",speakers:[],duration:0},
+  {id:505,day:4,start:'24 Aug',end:'31 Aug',title:'Rwanda Business & Investment Tour',type:'Pre-Conference',track:'JV / Venture Lab',room:'Kigali & surrounds',desc:'A structured post-conference tour for investors, founders, and corporate delegates. Visits to innovation hubs, SEZs, development finance institutions, and key government agencies — building on connections made during the conference.',speakers:[],duration:0},
+  {id:506,day:4,start:'24 Aug',end:'31 Aug',title:'Uganda Extension',type:'Pre-Conference',track:'Cultural',room:'Uganda',desc:'A cross-border extension into Uganda covering Kampala, Bwindi Impenetrable Forest (gorilla trekking), Queen Elizabeth National Park, and the Rwenzori region. 3–5 day packages.',speakers:[],duration:0},
+  {id:507,day:4,start:'24 Aug',end:'31 Aug',title:'Wider East Africa Packages',type:'Pre-Conference',track:'Cultural',room:'East Africa',desc:'Extended regional packages connecting Rwanda with Kenya (Nairobi, Masai Mara, Zanzibar), Tanzania (Serengeti, Ngorongoro, Kilimanjaro), and beyond. Coordinate with the travel desk during the conference.',speakers:[],duration:0},
+];
+
+let savedSessions = new Set();
+let activeFeedbackId = null;
+let currentRating = 0;
+let activeDay = 0;
+
+const TYPE_COLORS = {
+  'Plenary':  {bg:'#EEF2FF',color:'#3730A3'},
+  'Workshop': {bg:'#F0FDF4',color:'#166534'},
+  'Cultural': {bg:'#FFF7ED',color:'#9A3412'},
+  'Exhibition':{bg:'#F0FDFA',color:'#0E7490'},
+  'Summit':   {bg:'#FAF5FF',color:'#6B21A8'},
+  'Social':   {bg:'#FFF1F2',color:'#9F1239'},
+  'Logistics':{bg:'#F9FAFB',color:'#6B7280'},
+};
+
+function typeStyle(type){
+  const s=TYPE_COLORS[type]||{bg:'#F3F4F6',color:'#374151'};
+  return `background:${s.bg};color:${s.color}`;
+}
+
+function switchDay(d){
+  activeDay=d;
+  const tabs=document.querySelectorAll('.day-tab');
+  const tabIdx=d===-1?0:d===4?5:d+1;
+  tabs.forEach((t,i)=>t.classList.toggle('active',i===tabIdx));
+  renderSessions();
+}
+
+function renderSessions(){
+  const trackFilter=document.getElementById('sched-track-filter').value;
+  const daySessions=SESSIONS.filter(s=>s.day===activeDay&&(!trackFilter||s.track===trackFilter));
+  const list=document.getElementById('sessions-list');
+  if(!daySessions.length){list.innerHTML='<div class="empty"><h3>No sessions match this filter.</h3></div>';return;}
+
+  // Group by time block (morning/afternoon/evening)
+  const blocks={};
+  daySessions.forEach(s=>{
+    const timeParts=s.start.split(':');
+    const h=timeParts.length>1?parseInt(timeParts[0]):-1;
+    const block=h===-1?'Overview':h<12?'Morning':h<17?'Afternoon':'Evening';
+    if(!blocks[block]) blocks[block]=[];
+    blocks[block].push(s);
+  });
+
+  list.innerHTML=Object.entries(blocks).map(([label,sessions])=>`
+    <div class="time-block">
+      <div class="time-block-label">${label}</div>
+      ${sessions.map(s=>{
+        const spkrNames=s.speakers.map(id=>{const sp=SPEAKERS.find(x=>x.id===id);return sp?sp.first+' '+sp.last:'';}).filter(Boolean).join(', ');
+        const saved=savedSessions.has(s.id);
+        const dur=s.duration>=60?Math.floor(s.duration/60)+'h'+(s.duration%60?` ${s.duration%60}m`:''):s.duration+'m';
+        return `<div class="sess-card" onclick="openSess(${s.id})">
+          <div class="sess-time-col">
+            <span class="sess-time">${s.start}</span>
+            <span class="sess-dur">${dur}</span>
+          </div>
+          <div class="sess-body">
+            <div class="sess-title">
+              <span class="sess-track-dot" style="background:${tc(s.track)||'#9CA3AF'}"></span>
+              ${s.title}
+            </div>
+            ${spkrNames?`<div class="sess-speakers-line">${spkrNames}</div>`:''}
+            <div class="sess-meta-row">
+              <span class="sess-type-badge" style="${typeStyle(s.type)}">${s.type}</span>
+              ${s.room?`<span class="sess-room">${s.room}</span>`:''}
+            </div>
+          </div>
+          <button class="sess-bookmark${saved?' saved':''}" onclick="event.stopPropagation();toggleSave(${s.id})" title="${saved?'Remove from schedule':'Save to my schedule'}">${saved?'&#9733;':'&#9734;'}</button>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+
+  renderMySched();
+  renderSpeakersSidebar();
+}
+
+function toggleSave(id){
+  if(savedSessions.has(id)) savedSessions.delete(id);
+  else { savedSessions.add(id); showToast('Added to your schedule'); }
+  renderSessions();
+}
+
+function renderMySched(){
+  const saved=[...savedSessions].map(id=>SESSIONS.find(s=>s.id===id)).filter(Boolean).sort((a,b)=>{
+    if(a.day!==b.day) return a.day-b.day;
+    return a.start.localeCompare(b.start);
+  });
+  const el=document.getElementById('my-schedule-list');
+  if(!saved.length){el.innerHTML='<div class="sidebar-empty">Bookmark sessions to build your personal schedule.</div>';return;}
+  el.innerHTML=saved.map(s=>`
+    <div class="my-sched-item" onclick="openSess(${s.id})">
+      <div class="my-sched-dot" style="background:${tc(s.track)||'#9CA3AF'}"></div>
+      <div>
+        <div class="my-sched-title">${s.title}</div>
+        <div class="my-sched-time">${['Thu 20','Fri 21','Sat 22','Sun 23'][s.day]} &middot; ${s.start}</div>
+      </div>
+    </div>
+  `).join('');
+  const cnt=document.getElementById('sched-saved-count');
+  if(cnt) cnt.textContent=saved.length+' saved';
+}
+
+function renderSpeakersSidebar(){
+  const el=document.getElementById('speakers-mini-list');
+  el.innerHTML=SPEAKERS.map(sp=>{
+    const pl=pal(sp.first+sp.last);
+    return `<div class="spkr-mini" onclick="openSpkr('${sp.id}')">
+      <div class="avatar" style="width:36px;height:36px;font-size:12px;background:${pl.bg};color:${pl.fg}">${ini(sp)}</div>
+      <div>
+        <div class="spkr-mini-name">${sp.first} ${sp.last}</div>
+        <div class="spkr-mini-role">${sp.title}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openSess(id){
+  const s=SESSIONS.find(x=>x.id===id); if(!s) return;
+  document.getElementById('sm-type').textContent=s.type;
+  document.getElementById('sm-type').style.cssText=typeStyle(s.type)+';font-size:10px;font-weight:600;padding:3px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:0.06em';
+  document.getElementById('sm-title').textContent=s.title;
+  const dur=s.duration>=60?Math.floor(s.duration/60)+'h'+(s.duration%60?` ${s.duration%60}m`:''):s.duration+'m';
+  document.getElementById('sm-time-room').textContent=`${['Thu 20 Aug — Reconnect','Fri 21 Aug — Venture','Sat 22 Aug — Summit','Sun 23 Aug — Purpose','24–31 Aug — Post-Conference'][s.day]}  ·  ${s.start}–${s.end}  (${dur})  ·  ${s.room}`;
+  document.getElementById('sm-desc').textContent=s.desc;
+
+  const spkSec=document.getElementById('sm-speakers-sec');
+  const spkEl=document.getElementById('sm-speakers');
+  if(s.speakers.length){
+    spkSec.style.display='block';
+    spkEl.innerHTML=s.speakers.map(sid=>{
+      const sp=SPEAKERS.find(x=>x.id===sid); if(!sp) return '';
+      const pl=pal(sp.first+sp.last);
+      return `<div class="sm-spkr-row" onclick="event.stopPropagation();closeAllModals();openSpkr('${sp.id}')">
+        <div class="avatar" style="width:40px;height:40px;font-size:13px;background:${pl.bg};color:${pl.fg}">${ini(sp)}</div>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--ink)">${sp.first} ${sp.last}</div>
+          <div style="font-size:11px;color:var(--ink-soft)">${sp.title} &middot; ${sp.org}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } else { spkSec.style.display='none'; }
+
+  const saved=savedSessions.has(id);
+  document.getElementById('sm-acts').innerHTML=`
+    <button class="btn ${saved?'btn-ghost':'btn-primary'}" onclick="toggleSave(${id});this.textContent=savedSessions.has(${id})?'Saved ★':'Save to schedule';this.className='btn '+(savedSessions.has(${id})?'btn-ghost':'btn-primary')">
+      ${saved?'Saved ★':'Save to schedule'}
+    </button>
+    <button class="btn btn-ghost" onclick="closeSess();openFeedback(${id})">Leave feedback</button>
+  `;
+  renderSessionPoll(id);
+  renderSessionQA(id);
+  document.getElementById('sess-overlay').classList.add('open');
+}
+function closeSessO(e){if(e.target===document.getElementById('sess-overlay'))closeSess();}
+function closeSess(){document.getElementById('sess-overlay').classList.remove('open');}
+
+function openSpkr(id){
+  const sp=SPEAKERS.find(x=>x.id===id); if(!sp) return;
+  const pl=pal(sp.first+sp.last);
+  const av=document.getElementById('spkr-av');
+  av.style.background=pl.bg; av.style.color=pl.fg; av.textContent=ini(sp);
+  document.getElementById('spkr-name').textContent=sp.first+' '+sp.last;
+  document.getElementById('spkr-role').textContent=sp.title;
+  document.getElementById('spkr-org').textContent=sp.org;
+  document.getElementById('spkr-bio').textContent=sp.bio;
+  const spkrSessions=SESSIONS.filter(s=>s.speakers.includes(id));
+  document.getElementById('spkr-sessions').innerHTML=spkrSessions.length
+    ? spkrSessions.map(s=>`<div class="my-sched-item" onclick="closeSpkr();openSess(${s.id})">
+        <div class="my-sched-dot" style="background:${tc(s.track)||'#9CA3AF'}"></div>
+        <div><div class="my-sched-title">${s.title}</div>
+        <div class="my-sched-time">${['Thu 20','Fri 21','Sat 22','Sun 23'][s.day]} &middot; ${s.start}</div></div>
+      </div>`).join('')
+    : '<div class="sidebar-empty">No sessions assigned yet.</div>';
+  document.getElementById('spkr-acts').innerHTML='<button class="btn btn-ghost" onclick="closeSpkr()">Close</button>';
+  document.getElementById('spkr-overlay').classList.add('open');
+}
+function closeSpkrO(e){if(e.target===document.getElementById('spkr-overlay'))closeSpkr();}
+function closeSpkr(){document.getElementById('spkr-overlay').classList.remove('open');}
+
+function openFeedback(id){
+  const s=SESSIONS.find(x=>x.id===id); if(!s) return;
+  activeFeedbackId=id; currentRating=0;
+  document.getElementById('fb-title').textContent=s.title;
+  document.getElementById('fb-good').value='';
+  document.getElementById('fb-improve').value='';
+  updateStars(0);
+  document.getElementById('fb-overlay').classList.add('open');
+}
+function closeFbO(e){if(e.target===document.getElementById('fb-overlay'))closeFb();}
+function closeFb(){document.getElementById('fb-overlay').classList.remove('open');}
+
+function setRating(n){ currentRating=n; updateStars(n); }
+function updateStars(n){
+  document.querySelectorAll('.star-btn').forEach((b,i)=>b.classList.toggle('lit',i<n));
+}
+function submitFeedback(){
+  if(!currentRating){showToast('Please select a rating first');return;}
+  showToast('Feedback submitted — thank you!');
+  closeFb();
+}
+
+function closeAllModals(){
+  ['sess-overlay','spkr-overlay','m-overlay','fb-overlay','qr-ov'].forEach(id=>{
+    document.getElementById(id).classList.remove('open');
+  });
+}
+
+
+// ── PHASE 3: OPPORTUNITIES DATA ─────────────────────────────────────
+const OPP_TYPES = {
+  'Job':         {bg:'#EEF2FF',color:'#3730A3'},
+  'JV Proposal': {bg:'#F0FDFA',color:'#0E7490'},
+  'Investment':  {bg:'#FFF7ED',color:'#9A3412'},
+  'Mentorship':  {bg:'#F0FDF4',color:'#166534'},
+  'Partnership': {bg:'#FAF5FF',color:'#6B21A8'},
+  'Co-founder':  {bg:'#FFF1F2',color:'#9F1239'},
+};
+function oppTypeStyle(t){const s=OPP_TYPES[t]||{bg:'#F3F4F6',color:'#374151'};return `background:${s.bg};color:${s.color}`;}
+
+let OPPS = [
+  {id:1,title:'Regional Sales Lead — East Africa',type:'Job',sector:'Technology',countries:'Kenya, Rwanda, Uganda',desc:'We are hiring a Regional Sales Lead to drive enterprise sales across East Africa for our SaaS platform. 5+ years experience, based in Nairobi or Kigali preferred.',contact:'careers@example.com',posted_by:3,created_at:'2026-08-20',flagged:false},
+  {id:2,title:'Co-founder sought — AgriFintech startup',type:'Co-founder',sector:'Agriculture',countries:'Nigeria, Ghana, Kenya',desc:'Looking for a technical co-founder with experience in mobile money and rural last-mile distribution. We have the agriculture domain expertise and pilot data. Seeking product + engineering.',contact:'',posted_by:1,created_at:'2026-08-20',flagged:false},
+  {id:3,title:'Seed investment — EdTech platform',type:'Investment',sector:'Education',countries:'Pan-African',desc:'EduBridge Africa is raising a $500k seed round to expand our graduate employment platform from Kenya to 5 new markets. Traction: 12,000 users, 180 employer partners.',contact:'',posted_by:6,created_at:'2026-08-20',flagged:false},
+  {id:4,title:'Distribution partnership — West + East Africa',type:'Partnership',sector:'Energy',countries:'Senegal, Ghana, Kenya, Rwanda',desc:'Volta Energy is seeking distribution partners in East Africa to expand our solar mini-grid model. We have the product, capital, and West African operations. Looking for local market expertise.',contact:'',posted_by:1,created_at:'2026-08-20',flagged:false},
+  {id:5,title:'Mentorship — Fundraising and investor relations',type:'Mentorship',sector:'Finance',countries:'MEA',desc:'Offering 3 mentorship slots to early-stage founders preparing for their first institutional raise. Focus on pitch deck, financial model, and investor meeting preparation.',contact:'',posted_by:4,created_at:'2026-08-20',flagged:false},
+  {id:6,title:'Data engineer — 6-month contract',type:'Job',sector:'Technology',countries:'Remote / South Africa',desc:'Insight Analytics is hiring a mid-level data engineer for a 6-month contract, extendable. Python, dbt, Airflow. Fully remote. Start September 2026.',contact:'',posted_by:10,created_at:'2026-08-20',flagged:false},
+  {id:7,title:'JV proposal — Digital logistics MEA corridor',type:'JV Proposal',sector:'Technology',countries:'UAE, Kenya, Nigeria',desc:'Seeking 2–3 partners to co-build a digital freight and logistics coordination platform for the UAE-East Africa-West Africa trade corridor. We bring the UAE market access and seed capital.',contact:'',posted_by:9,created_at:'2026-08-21',flagged:false},
+  {id:8,title:'Policy advisory — Youth employment programme',type:'Partnership',sector:'Policy',countries:'Rwanda, Uganda, Tanzania',desc:'Rwanda Development Board is looking for partners to co-design a youth employment programme. Open to NGOs, corporate partners, and training institutions.',contact:'',posted_by:5,created_at:'2026-08-21',flagged:false},
+];
+let nextOppId = 9;
+
+const MENTORS = [
+  {id:'m1',participant_id:4,areas:['Fundraising','Investor relations','Due diligence'],availability:'Day 2 — structured sessions',max_mentees:'3',note:'Best placed to help pre-seed and seed-stage founders preparing for institutional capital. Come with your numbers.',requests:[]},
+  {id:'m2',participant_id:2,areas:['Policy & advocacy','Youth employment','International development'],availability:'Day 1 afternoon',max_mentees:'2',note:'Happy to advise on navigating development finance institutions and government partnerships.',requests:[]},
+  {id:'m3',participant_id:6,areas:['Career development','B2B sales','Talent acquisition'],availability:'Flexible / anytime',max_mentees:'4–5',note:'Particularly useful for professionals looking to make their first senior move or build cross-border careers.',requests:[]},
+  {id:'m4',participant_id:8,areas:['Leadership','Team building','Women in tech'],availability:'Day 1 afternoon',max_mentees:'3',note:'Open to mentoring women in tech and leaders building high-performance teams in emerging markets.',requests:[]},
+  {id:'m5',participant_id:5,areas:['Government relations','Rwanda ecosystem','Trade facilitation'],availability:'Day 3 morning',max_mentees:'2',note:'Can help founders and investors understand how to engage the Rwandan government and RDB effectively.',requests:[]},
+];
+let myMatches = [];
+
+// ── EXTERNAL OPPORTUNITIES (curated, grouped by type) ─────────────────
+const EXT_OPPS = [
+  // FELLOWSHIPS
+  {id:'e1', type:'Fellowship', title:'Global Good Fund Fellowship', org:'Global Good Fund', region:'Global', desc:'A selective 12-month hybrid programme investing in the leadership development of founders and senior leaders at social impact organisations worldwide. Open to CEOs, COOs, CTOs and Executive Directors of for-profit or non-profit social enterprises operational for at least two years.', url:'https://globalgoodfund.org/fellowship/'},
+  {id:'e2', type:'Fellowship', title:'Elevate Africa Fellowship', org:'Elevate Africa', region:'Pan-Africa', desc:'A prestigious mid-career pan-African leadership programme for professionals with 10–15 years of experience and a sustained track record of driving positive change. Sectors include governance, entrepreneurship, media, health, and climate action.', url:'https://opportunitydesk.org/2026/01/20/elevate-africa-fellowship-2026/'},
+  {id:'e3', type:'Fellowship', title:'Acumen Green RISE East Africa Fellowship', org:'Acumen / Mastercard Foundation', region:'East Africa', desc:'A leadership fellowship for entrepreneurs driving climate solutions in Kenya, Uganda, Tanzania, Rwanda, and Ethiopia. Fellows build moral leadership skills, refine business models, and grow inclusive green jobs for young women and rural youth.', url:'https://fellowship.acumenacademy.org/green-rise-east-africa-fellowship-2026'},
+  {id:'e4', type:'Fellowship', title:'OMLA Fellowship 2026', org:'One Million Leaders Africa', region:'Pan-Africa', desc:'Part of a movement to raise one million purpose-driven African leaders by 2030. The fellowship provides leadership training, mentorship, and community impact experience for young Africans with demonstrated initiative and passion.', url:'https://opportunitiesforyouth.org/2026/04/13/omla-fellowship-programme-2026/'},
+  {id:'e5', type:'Fellowship', title:'NGFP MENA Fellowship', org:'Next Generation Foresight Practitioners / Dubai Future Foundation', region:'Middle East', desc:'A fellowship for emerging futures and foresight practitioners across the Middle East and North Africa, delivered in partnership with the Dubai Future Foundation\'s Global Futures Society. Open to all MENA countries.', url:'https://nextgenforesight.org/the-mena-fellowship/'},
+  {id:'e6', type:'Fellowship', title:'Africa SDGs Mentorship Programme', org:'AIIDEV Africa', region:'Pan-Africa', desc:'A cohort-based mentorship and fellowship programme for early-to-mid-career African leaders passionate about advancing the continent\'s sustainable development goals. Participants are matched with mentors and engage in collaborative impact projects.', url:'https://www.globalsouthopportunities.com/2026/03/07/sdgs/'},
+  {id:'e7', type:'Fellowship', title:'LEAP Africa Social Innovators Programme', org:'LEAP Africa', region:'Pan-Africa', desc:'A fully funded 9-month accelerator fellowship for early-stage African social entrepreneurs ready to scale their impact. Provides structured training, mentorship, funding access, and exposure to investors and policymakers.', url:'https://opportunitiesforyouth.org/2026/05/06/leap-africa-social-innovators-programme-fellowship-2026/'},
+  // ACCELERATORS
+  {id:'e8', type:'Accelerator', title:'Accelerate Africa Startup Programme', org:'Accelerate Africa', region:'Pan-Africa', desc:'A 12-week equity-free startup accelerator for early-stage African founders building scalable, tech-driven solutions. Selected startups receive 1:1 mentorship from experienced operators and investors, with potential investment of USD 250,000 to USD 500,000.', url:'https://www.globalsouthopportunities.com/2026/05/05/accelerate/'},
+  {id:'e9', type:'Accelerator', title:'Google for Startups Accelerator: Africa', org:'Google', region:'Pan-Africa', desc:'A 3-month equity-free hybrid accelerator for growth-stage revenue-generating African tech startups. Selected teams receive mentorship from Google engineers and business experts, Google Cloud credits, and access to a global investor network.', url:'https://startup.google.com/programs/accelerator/africa/'},
+  {id:'e10', type:'Accelerator', title:'Google for Startups Accelerator: MENA & Turkey', org:'Google', region:'Middle East', desc:'A 10-week equity-free accelerator for Seed to Series A tech startups based in the Middle East, North Africa, Turkey, the Caucasus, and Central Asia. Focused on AI/ML, cloud, UX, and product strategy, with up to $350,000 in Google Cloud credits.', url:'https://startup.google.com/programs/accelerator/middle-east-north-africa-turkey/'},
+  {id:'e11', type:'Accelerator', title:'AfriLabs Talent Accelerator 2026', org:'AfriLabs', region:'Pan-Africa', desc:'A structured internship and returnship programme connecting emerging African talent with real-world experience inside AfriLabs\' continental innovation hub network. Open to recent graduates and returning professionals.', url:'https://www.opportunitiesforafricans.com/'},
+  // PROGRAMMES
+  {id:'e12', type:'Programme', title:'One Young World Summit 2026', org:'One Young World', region:'Global', desc:'A global forum for young leaders, held in Cape Town November 2026. Multiple scholarship pathways available. One Young World brings together over 2,000 delegates from 190+ countries — the format and values align closely with the AIESEC community.', url:'https://www.oneyoungworld.com/summit'},
+  {id:'e13', type:'Programme', title:'ACET Youth Policy Lab 2026', org:'African Center for Economic Transformation', region:'Pan-Africa', desc:'A dynamic platform for young African policy leaders to engage with pressing economic transformation challenges. Combines research, mentorship, and direct engagement with senior policymakers and institutions.', url:'https://www.opportunitiesforafricans.com/'},
+  {id:'e14', type:'Programme', title:'Africa\'s Business Heroes Prize', org:'Jack Ma Foundation', region:'Pan-Africa', desc:'One of the continent\'s most prestigious entrepreneurship competitions. Ten finalists pitch at the Grand Finale for a share of a $1.5 million prize pool, plus long-term visibility, mentorship, and access to a pan-African business network.', url:'https://www.africabusinessheroes.org/'},
+];
+
+const EXT_MENTOR_PLATFORMS = [
+  {id:'mp1', name:'ADPList', tagline:'Free 1:1 mentorship with 40,000+ global mentors', desc:'A global platform with over 40,000 volunteer mentors across design, product, engineering, marketing, data, and more. Book free 1:1 video sessions with no fees, no paywalls — AAMEA alumni can both find mentors and offer mentorship here.', url:'https://adplist.org', icon:'🌐'},
+  {id:'mp2', name:'Linked Africa Mentorship', tagline:'1:1 cross-sector professional mentorship across Africa', desc:'Connects professionals across Africa for personalised one-on-one mentoring relationships in diverse fields. Designed to help you gain insights, expand your network, and develop the skills needed to advance your career on the continent.', url:'https://mentorship.linked.africa', icon:'🤝'},
+  {id:'mp3', name:'African Centre for Career Mentorship', tagline:'Africa-specific career mentorship and skill development', desc:'A platform dedicated to unlocking professional potential through expert mentorship, career resources, and skill development programmes across Africa. Covers multiple sectors and career stages.', url:'https://www.africanccm.com', icon:'🎯'},
+  {id:'mp4', name:'Mentorship Matters Africa', tagline:'Bridging potential and achievement for young Africans', desc:'A programme that bridges the gap between potential and achievement through mentorship, practical programmes, and community support for young Africans across sectors.', url:'https://www.mentorshipmattersafrica.com', icon:'✨'},
+  {id:'mp5', name:'Africa 2.0 Mentorship', tagline:'Intergenerational mentorship across the continent', desc:'The Africa 2.0 Mentorship Programme offers formal and informal mentorship based on fostering intergenerational dialogue — experienced leaders sharing knowledge with the next wave of African changemakers.', url:'http://www.africa2point0.org/impact-initiatives/mentorship/', icon:'🌍'},
+];
+
+const EXT_OPP_TYPES = ['Fellowship','Accelerator','Programme'];
+
+function renderExtOpps(filter){
+  const container = document.getElementById('ext-opps-container');
+  if(!container) return;
+  const filtered = filter ? EXT_OPPS.filter(o=>o.type===filter) : EXT_OPPS;
+  if(!filtered.length){container.innerHTML='<div class="tracker-empty"><h3>No opportunities match.</h3></div>';return;}
+
+  // Group by type
+  const groups = {};
+  EXT_OPP_TYPES.forEach(t=>{ groups[t]=[]; });
+  filtered.forEach(o=>{ if(groups[o.type]) groups[o.type].push(o); });
+
+  const typeColors = {
+    'Fellowship': {bg:'#EEF2FF', color:'#3730A3'},
+    'Accelerator': {bg:'#FFF7ED', color:'#9A3412'},
+    'Programme':   {bg:'#F0FDF4', color:'#166534'},
+  };
+
+  container.innerHTML = EXT_OPP_TYPES.map(type=>{
+    const items = groups[type];
+    if(!items.length) return '';
+    const tc = typeColors[type]||{bg:'#F3F4F6',color:'#374151'};
+    return `
+      <div class="ext-opp-group">
+        <div class="ext-group-label">${type}s</div>
+        <div class="opp-grid">
+          ${items.map(o=>`
+            <div class="opp-card" onclick="window.open('${o.url}','_blank')">
+              <div class="opp-card-top">
+                <span class="opp-type-pill" style="background:${tc.bg};color:${tc.color}">${o.type}</span>
+                <span class="opp-new-badge" style="background:#F0F9FF;color:#0369A1">${o.region}</span>
+              </div>
+              <div class="opp-title">${o.title}</div>
+              <div style="font-size:11px;color:var(--aamea-deep);font-weight:500;margin-bottom:6px">${o.org}</div>
+              <div class="opp-desc-preview">${o.desc}</div>
+              <div class="opp-card-footer">
+                <span style="font-size:11px;color:var(--aamea-teal)">↗ Visit opportunity</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterExtOpps(){
+  const val = document.getElementById('ext-type-filter') ? document.getElementById('ext-type-filter').value : '';
+  renderExtOpps(val||null);
+}
+
+function renderExtMentorPlatforms(){
+  const container = document.getElementById('ext-mentor-platforms');
+  if(!container) return;
+  container.innerHTML = EXT_MENTOR_PLATFORMS.map(p=>`
+    <div class="mentor-card" style="cursor:pointer" onclick="window.open('${p.url}','_blank')">
+      <div class="mentor-card-top">
+        <div style="width:48px;height:48px;border-radius:var(--r-md);background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${p.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;color:var(--ink)">${p.name}</div>
+          <div style="font-size:11px;color:var(--aamea-deep);font-weight:500;margin-top:2px">${p.tagline}</div>
+        </div>
+      </div>
+      <div class="mentor-note" style="font-style:normal">${p.desc}</div>
+      <div style="padding-top:10px;border-top:1px solid var(--border)">
+        <span style="font-size:11px;color:var(--aamea-teal);font-weight:500">↗ Visit platform</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+const WORKSPACES = [
+  {id:'w1',name:'AgriLink MEA',type:'JV Proposal',sector:'Agriculture',countries:'Nigeria, Kenya, Rwanda',desc:'Building a cross-border agricultural input supply chain connecting smallholder farmers in East and West Africa to verified suppliers and affordable financing.',members:[1,6,10],needs:['CTO / Tech lead','Logistics expert','Impact investor'],doc_link:''},
+  {id:'w2',name:'PayRoam',type:'Venture Lab',sector:'Finance',countries:'Ghana, Kenya, UAE',desc:'A cross-border payroll and compliance platform for African companies hiring across borders. Targeting the UAE-Africa corridor first.',members:[3,9],needs:['Legal co-founder','HR / compliance expert','Series A investor'],doc_link:''},
+  {id:'w3',name:'SolarGrid East',type:'Venture Lab',sector:'Energy',countries:'Rwanda, Uganda, Tanzania',desc:'Replicating the Volta Energy mini-grid model in East Africa. Seeking partners with local government relationships and land access.',members:[1,5],needs:['Country director — Uganda','Country director — Tanzania','Development finance partner'],doc_link:''},
+  {id:'w4',name:'MindBridge AI',type:'Hackathon Team',sector:'Technology',countries:'Egypt, Nigeria, Morocco',desc:'Building an AI-powered mental health support tool for African universities and workplaces, with culturally contextualised responses across Arabic, French, and English.',members:[4,2,7],needs:['ML engineer','Clinical psychologist advisor','University partnership'],doc_link:''},
+];
+let myWorkspaces = [];
+
+let trackerItems = [];
+let nextTrackerId = 1;
+
+// ── OPP BOARD ────────────────────────────────────────────────────────
+function switchOppTab(tab){
+  document.querySelectorAll('.opp-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.opp-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('otab-'+tab).classList.add('active');
+  document.getElementById('opp-panel-'+tab).classList.add('active');
+  if(tab==='board') { renderOpps(); renderExtOpps(); }
+  if(tab==='mentors') renderMentors();
+  if(tab==='jv') renderJV();
+  if(tab==='tracker') renderTracker();
+}
+
+function filterOpps(){
+  const q=document.getElementById('opp-search').value.toLowerCase();
+  const type=document.getElementById('opp-type-filter').value;
+  const sector=document.getElementById('opp-sector-filter').value;
+  renderOpps(OPPS.filter(o=>{
+    const text=(o.title+' '+o.desc+' '+o.countries).toLowerCase();
+    return(!q||text.includes(q))&&(!type||o.type===type)&&(!sector||o.sector===sector)&&!o.flagged;
+  }));
+}
+
+function renderOpps(list){
+  const opps=list||OPPS.filter(o=>!o.flagged);
+  const grid=document.getElementById('opp-grid');
+  if(!opps.length){grid.innerHTML='<div class="tracker-empty" style="grid-column:1/-1"><h3>No opportunities match.</h3><p>Try a different filter or be the first to post.</p></div>';return;}
+  grid.innerHTML=opps.map(o=>{
+    const poster=DEMO.find(p=>p.id===o.posted_by)||{first:'Anonymous',last:'',org:''};
+    const pl=pal(poster.first+poster.last);
+    const isNew=o.created_at==='2026-08-21';
+    return `<div class="opp-card" onclick="openOppDetail(${o.id})">
+      <div class="opp-card-top">
+        <span class="opp-type-pill" style="${oppTypeStyle(o.type)}">${o.type}</span>
+        ${isNew?'<span class="opp-new-badge">New</span>':''}
+      </div>
+      <div class="opp-title">${o.title}</div>
+      <div class="opp-desc-preview">${o.desc}</div>
+      <div class="opp-card-footer">
+        <div class="opp-poster">
+          <div class="avatar" style="width:24px;height:24px;font-size:9px;background:${pl.bg};color:${pl.fg}">${ini(poster)}</div>
+          <span class="opp-poster-name">${poster.first} ${poster.last}</span>
+        </div>
+        <div class="opp-meta-pills">
+          ${o.sector?`<span class="pill pill-t">${o.sector}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openOppDetail(id){
+  const o=OPPS.find(x=>x.id===id); if(!o) return;
+  const poster=DEMO.find(p=>p.id===o.posted_by)||{first:'Anonymous',last:'',title:'',org:''};
+  const pl=pal(poster.first+poster.last);
+  document.getElementById('od-type-badge').textContent=o.type;
+  document.getElementById('od-type-badge').style.cssText=oppTypeStyle(o.type)+';font-size:10px;font-weight:600;padding:3px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:0.06em';
+  document.getElementById('od-title').textContent=o.title;
+  document.getElementById('od-meta').textContent=o.sector+(o.countries?' · '+o.countries:'');
+  document.getElementById('od-desc').textContent=o.desc;
+  document.getElementById('od-poster').innerHTML=`
+    <div class="avatar" style="width:40px;height:40px;font-size:13px;background:${pl.bg};color:${pl.fg}">${ini(poster)}</div>
+    <div><div style="font-size:13px;font-weight:500">${poster.first} ${poster.last}</div>
+    <div style="font-size:11px;color:var(--ink-soft)">${poster.title}${poster.org?' · '+poster.org:''}</div></div>`;
+  const contSec=document.getElementById('od-contact-sec');
+  if(o.contact){document.getElementById('od-contact').textContent=o.contact;contSec.style.display='block';}
+  else contSec.style.display='none';
+  document.getElementById('od-respond-btn').onclick=()=>{
+    document.getElementById('opp-detail-overlay').classList.remove('open');
+    showToast('Interest registered — the poster will be notified');
+    addTrackerFromOpp(o);
+  };
+  document.getElementById('opp-detail-overlay').classList.add('open');
+}
+
+function addTrackerFromOpp(o){
+  trackerItems.unshift({id:nextTrackerId++,title:'Follow up: '+o.title,type:'Follow-up',priority:'High',date:'',notes:'From opportunity board',done:false});
+}
+
+function flagOpp(){
+  showToast('Opportunity flagged for review. Thank you.');
+  document.getElementById('opp-detail-overlay').classList.remove('open');
+}
+
+function openPostOpp(){ document.getElementById('post-opp-overlay').classList.add('open'); }
+
+function submitOpp(){
+  const title=document.getElementById('po-title').value.trim();
+  const type=document.getElementById('po-type').value;
+  if(!title||!type){showToast('Please fill in a title and type');return;}
+  OPPS.unshift({
+    id:nextOppId++,title,type,
+    sector:document.getElementById('po-sector').value,
+    countries:document.getElementById('po-countries').value,
+    desc:document.getElementById('po-desc').value,
+    contact:document.getElementById('po-contact').value,
+    posted_by:'me',created_at:'2026-08-21',flagged:false
+  });
+  document.getElementById('post-opp-overlay').classList.remove('open');
+  renderOpps();
+  showToast('Opportunity posted');
+}
+
+// ── MENTORS ──────────────────────────────────────────────────────────
+function renderMentors(){
+  const grid=document.getElementById('mentors-grid');
+  grid.innerHTML=MENTORS.map(m=>{
+    const p=DEMO.find(x=>x.id===m.participant_id)||{first:'Mentor',last:'',title:'',org:''};
+    const pl=pal(p.first+p.last);
+    const requested=myMatches.includes(m.id);
+    return `<div class="mentor-card">
+      <div class="mentor-card-top">
+        <div class="avatar" style="width:48px;height:48px;font-size:16px;background:${pl.bg};color:${pl.fg}">${ini(p)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;color:var(--ink)">${p.first} ${p.last}</div>
+          <div style="font-size:12px;color:var(--ink-soft)">${p.title}${p.org?' · '+p.org:''}</div>
+        </div>
+      </div>
+      <div class="mentor-areas">${m.areas.map(a=>`<span class="mentor-area-pill">${a}</span>`).join('')}</div>
+      ${m.note?`<div class="mentor-note">"${m.note}"</div>`:''}
+      <div class="mentor-avail">Available: ${m.availability} &nbsp;·&nbsp; Up to ${m.max_mentees} mentee${m.max_mentees==='1'?'':'s'}</div>
+      <button class="btn ${requested?'btn-ghost':'btn-teal'}" style="width:100%" onclick="requestMentor('${m.id}')">
+        ${requested?'Request sent':'Request mentorship'}
+      </button>
+    </div>`;
+  }).join('');
+  renderMyMatches();
+  renderExtMentorPlatforms();
+}
+
+function requestMentor(mid){
+  if(myMatches.includes(mid)){showToast('Request already sent');return;}
+  myMatches.push(mid);
+  renderMentors();
+  showToast('Mentorship request sent');
+}
+
+function renderMyMatches(){
+  const el=document.getElementById('my-matches-list');
+  if(!myMatches.length){el.innerHTML='<div class="sidebar-empty">No matches yet.</div>';return;}
+  el.innerHTML=myMatches.map(mid=>{
+    const m=MENTORS.find(x=>x.id===mid);
+    const p=m?DEMO.find(x=>x.id===m.participant_id):null;
+    if(!p) return '';
+    const pl=pal(p.first+p.last);
+    return `<div class="my-sched-item">
+      <div class="avatar" style="width:28px;height:28px;font-size:10px;background:${pl.bg};color:${pl.fg}">${ini(p)}</div>
+      <div><div class="my-sched-title">${p.first} ${p.last}</div>
+      <div class="my-sched-time">Request sent &middot; ${m.availability}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function openMentorOpt(){ document.getElementById('mentor-opt-overlay').classList.add('open'); }
+
+function submitMentorOpt(){
+  const areas=document.getElementById('mo-areas').value.trim();
+  if(!areas){showToast('Please enter your mentorship areas');return;}
+  MENTORS.push({
+    id:'m'+(MENTORS.length+1),
+    participant_id:'me',
+    areas:areas.split(',').map(a=>a.trim()).filter(Boolean),
+    availability:document.getElementById('mo-avail').value,
+    max_mentees:document.getElementById('mo-max').value,
+    note:document.getElementById('mo-note').value,
+    requests:[]
+  });
+  document.getElementById('mentor-opt-overlay').classList.remove('open');
+  renderMentors();
+  showToast('You are now listed as a mentor');
+}
+
+// ── JV WORKSPACES ────────────────────────────────────────────────────
+function renderJV(){
+  const grid=document.getElementById('jv-grid');
+  grid.innerHTML=WORKSPACES.map(w=>{
+    const sectorColor=tc(w.sector)||'#C9973A';
+    const memberAvatars=w.members.map(pid=>{
+      const p=DEMO.find(x=>x.id===pid)||{first:'?',last:''};
+      const pl=pal(p.first+p.last);
+      return `<div class="jv-member-av" style="background:${pl.bg};color:${pl.fg}">${ini(p)}</div>`;
+    }).join('');
+    return `<div class="jv-card" onclick="openWorkspace('${w.id}')">
+      <div class="jv-card-accent" style="background:var(--aamea-gold)"></div>
+      <div class="jv-card-type">${w.type} &nbsp;·&nbsp; ${w.sector}</div>
+      <div class="jv-title">${w.name}</div>
+      <div class="jv-desc">${w.desc}</div>
+      <div class="jv-members">${memberAvatars}
+        <div style="font-size:11px;color:var(--ink-soft);margin-left:10px;line-height:28px">${w.members.length} member${w.members.length!==1?'s':''}</div>
+      </div>
+      <div class="jv-needs">
+        ${w.needs.map(n=>`<span class="jv-need-pill">+ ${n}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openWorkspace(id){
+  const w=WORKSPACES.find(x=>x.id===id); if(!w) return;
+  document.getElementById('ws-title').textContent=w.name;
+  document.getElementById('ws-type-tag').textContent=w.type+' · '+w.sector+' · '+w.countries;
+  document.getElementById('ws-desc').textContent=w.desc;
+  const membersEl=document.getElementById('ws-members');
+  membersEl.innerHTML=w.members.map(pid=>{
+    const p=DEMO.find(x=>x.id===pid)||{first:'Member',last:'',title:'',org:''};
+    const pl=pal(p.first+p.last);
+    return `<div class="ws-member-row">
+      <div class="avatar" style="width:36px;height:36px;font-size:12px;background:${pl.bg};color:${pl.fg}">${ini(p)}</div>
+      <div><div style="font-size:13px;font-weight:500">${p.first} ${p.last}</div>
+      <div style="font-size:11px;color:var(--ink-soft)">${p.title}${p.org?' · '+p.org:''}</div></div>
+    </div>`;
+  }).join('');
+  const docSec=document.getElementById('ws-doc-sec');
+  if(w.doc_link){document.getElementById('ws-doc-link').href=w.doc_link;docSec.style.display='block';}
+  else docSec.style.display='none';
+  document.getElementById('ws-needs').innerHTML=w.needs.map(n=>`<span class="jv-need-pill">+ ${n}</span>`).join('');
+  document.getElementById('ws-join-btn').onclick=()=>{
+    document.getElementById('workspace-overlay').classList.remove('open');
+    showToast('Join request sent to '+w.name+' team');
+  };
+  document.getElementById('workspace-overlay').classList.add('open');
+}
+
+function openNewWorkspace(){ document.getElementById('new-ws-overlay').classList.add('open'); }
+
+function submitWorkspace(){
+  const name=document.getElementById('nw-name').value.trim();
+  if(!name){showToast('Please give your venture a name');return;}
+  WORKSPACES.unshift({
+    id:'w'+(WORKSPACES.length+10),
+    name,
+    type:document.getElementById('nw-type').value,
+    sector:document.getElementById('nw-sector').value,
+    countries:document.getElementById('nw-countries').value,
+    desc:document.getElementById('nw-desc').value,
+    members:['me'],
+    needs:document.getElementById('nw-needs').value.split(',').map(s=>s.trim()).filter(Boolean),
+    doc_link:document.getElementById('nw-doc').value.trim()
+  });
+  document.getElementById('new-ws-overlay').classList.remove('open');
+  renderJV();
+  showToast('Workspace created — share it with potential collaborators');
+}
+
+// ── TRACKER ──────────────────────────────────────────────────────────
+const PRIORITY_COLORS={'High':'#C0472F','Medium':'#C9973A','Low':'#1B7B6E'};
+
+function renderTracker(){
+  const el=document.getElementById('tracker-list');
+  const active=trackerItems.filter(t=>!t.done);
+  const done=trackerItems.filter(t=>t.done);
+  const all=[...active,...done];
+  if(!all.length){
+    el.innerHTML=`<div class="tracker-empty"><h3>Your tracker is empty</h3><p>Add follow-ups, commitments, and opportunities you want to keep moving on after the conference.</p></div>`;
+    return;
+  }
+  el.innerHTML=all.map(t=>`
+    <div class="tracker-item" style="opacity:${t.done?0.5:1}">
+      <div class="tracker-priority" style="background:${PRIORITY_COLORS[t.priority]||'#9CA3AF'}"></div>
+      <div class="tracker-body">
+        <div class="tracker-title" style="text-decoration:${t.done?'line-through':''}">${t.title}</div>
+        <div class="tracker-meta">
+          ${t.type} &nbsp;·&nbsp; ${t.priority} priority
+          ${t.date?' &nbsp;·&nbsp; Follow up: '+t.date:''}
+          ${t.notes?'<br><span style="font-style:italic">'+t.notes+'</span>':''}
+        </div>
+      </div>
+      <div class="tracker-actions">
+        <button class="tracker-done-btn" onclick="toggleTrackerDone(${t.id})" title="${t.done?'Mark incomplete':'Mark done'}">
+          ${t.done?'&#10003;':'&#9711;'}
+        </button>
+        <button class="tracker-done-btn" onclick="deleteTrackerItem(${t.id})" title="Remove" style="font-size:14px">&#x2715;</button>
+      </div>
+    </div>`).join('');
+}
+
+function toggleTrackerDone(id){
+  const t=trackerItems.find(x=>x.id===id); if(t) t.done=!t.done;
+  renderTracker();
+}
+function deleteTrackerItem(id){
+  trackerItems=trackerItems.filter(x=>x.id!==id);
+  renderTracker();
+}
+function openAddTracker(){ document.getElementById('tracker-overlay').classList.add('open'); }
+function addTrackerItem(){
+  const title=document.getElementById('tr-title').value.trim();
+  if(!title){showToast('Please enter a title');return;}
+  trackerItems.unshift({
+    id:nextTrackerId++,title,
+    type:document.getElementById('tr-type').value,
+    priority:document.getElementById('tr-priority').value,
+    date:document.getElementById('tr-date').value,
+    notes:document.getElementById('tr-notes').value,
+    done:false
+  });
+  document.getElementById('tracker-overlay').classList.remove('open');
+  renderTracker();
+  showToast('Added to tracker');
+}
+
+
+// ── PHASE 4: RESOURCE LIBRARY ───────────────────────────────────────
+const RES_ICONS = {
+  'Slide deck':{icon:'&#128203;',bg:'#EEF2FF',color:'#3730A3'},
+  'Recording':{icon:'&#127909;',bg:'#FFF1F2',color:'#9F1239'},
+  'Document':{icon:'&#128196;',bg:'#F0FDF4',color:'#166534'},
+  'Link':{icon:'&#128279;',bg:'#F0FDFA',color:'#0E7490'},
+  'Toolkit':{icon:'&#128296;',bg:'#FFF7ED',color:'#9A3412'},
+};
+
+const RESOURCES = [
+  {id:1,title:'Opening Plenary slide deck — Once an AIESECer, Always an AIESECer',type:'Slide deck',track:'Plenary',session_id:104,tags:['Day 0','Plenary']},
+  {id:2,title:'Market Entry Masterclass — full presentation',type:'Slide deck',track:'JV / Venture Lab',session_id:201,tags:['Day 1','Venture']},
+  {id:3,title:'AfCFTA & Cross-Border Expansion — reference guide',type:'Toolkit',track:'JV / Venture Lab',session_id:204,tags:['Trade','Policy']},
+  {id:4,title:'Doing Business in Rwanda — investor checklist',type:'Document',track:'JV / Venture Lab',session_id:205,tags:['Rwanda','Investment']},
+  {id:5,title:'Future of Work Summit — opening keynote recording',type:'Recording',track:'Summit',session_id:301,tags:['Summit','AI']},
+  {id:6,title:'AI for Real Work — toolkit and prompt library',type:'Toolkit',track:'Summit',session_id:305,tags:['AI','Tools']},
+  {id:7,title:'Career Acceleration — CV and interview templates',type:'Toolkit',track:'Career & Leadership',session_id:306,tags:['Career']},
+  {id:8,title:'JV Lab — business model canvas template',type:'Document',track:'JV / Venture Lab',session_id:202,tags:['Venture','Template']},
+  {id:9,title:'Agenda 2063 — practical opportunities briefing',type:'Document',track:'Plenary',session_id:401,tags:['Policy','Africa']},
+  {id:10,title:'Embassy & International Cooperation Forum — partner directory',type:'Link',track:'Plenary',session_id:402,tags:['Diplomacy']},
+  {id:11,title:'AAMEA Interact — platform user guide',type:'Document',track:'Plenary',session_id:0,tags:['Platform','Guide']},
+  {id:12,title:'Closing Plenary recording — Reconnect. Reimagine. Rebuild. Reignite.',type:'Recording',track:'Plenary',session_id:406,tags:['Day 3','Closing']},
+];
+
+function filterResources(){
+  const q=document.getElementById('res-search').value.toLowerCase();
+  const type=document.getElementById('res-type-filter').value;
+  const track=document.getElementById('res-track-filter').value;
+  renderResources(RESOURCES.filter(r=>{
+    const text=(r.title+' '+r.tags.join(' ')).toLowerCase();
+    return(!q||text.includes(q))&&(!type||r.type===type)&&(!track||r.track===track);
+  }));
+}
+
+function renderResources(list){
+  const items=list||RESOURCES;
+  const grid=document.getElementById('res-grid');
+  if(!items.length){grid.innerHTML='<div class="tracker-empty" style="grid-column:1/-1"><h3>No resources match.</h3></div>';return;}
+  grid.innerHTML=items.map(r=>{
+    const style=RES_ICONS[r.type]||{icon:'&#128196;',bg:'#F3F4F6',color:'#374151'};
+    return `<div class="res-card" onclick="showToast('Opening: ${r.title.replace(/'/g,"&#39;")}')">
+      <div class="res-icon" style="background:${style.bg};color:${style.color}">${style.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div class="res-title">${r.title}</div>
+        <div class="res-meta">${r.type} &nbsp;·&nbsp; ${r.track||'General'}</div>
+        <div class="res-tags">${r.tags.map(t=>`<span class="pill pill-t">${t}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── EXHIBITOR DIRECTORY ─────────────────────────────────────────────
+const EXHIBITORS = [
+  {id:1,name:'Volta Energy',sector:'Energy',desc:'Solar mini-grid infrastructure serving 40,000+ households across Senegal and Guinea.',booth:'Booth A12',linked_participant:1},
+  {id:2,name:'PayStack Alumni Network',sector:'Finance',desc:'Open-source payment infrastructure tools for underserved communities across Africa.',booth:'Booth A14',linked_participant:3},
+  {id:3,name:'EduBridge Africa',sector:'Education',desc:'Connecting African graduates with global employers through a structured placement platform.',booth:'Booth B03',linked_participant:6},
+  {id:4,name:'Studio Benhaddou',sector:'Creative',desc:'Sustainable urban design and architecture for rapidly growing African cities.',booth:'Booth B07',linked_participant:7},
+  {id:5,name:'AfriLead Foundation',sector:'Education',desc:'Leadership development and women-in-tech programmes delivering 21st-century skills training.',booth:'Booth A18',linked_participant:8},
+  {id:6,name:'Insight Analytics',sector:'Technology',desc:'Data infrastructure for African SMEs in healthcare, agriculture, and logistics.',booth:'Booth C02',linked_participant:10},
+  {id:7,name:'Sawari Ventures',sector:'Finance',desc:'Early-stage investment fund focused on EdTech, HealthTech, and climate startups across MEA.',booth:'Booth A05',linked_participant:4},
+  {id:8,name:'Rwanda Development Board',sector:'Tourism',desc:'Official investment, trade, and tourism promotion agency for the Republic of Rwanda.',booth:'Booth Main Stage',linked_participant:5},
+];
+
+function filterExhibitors(){
+  const sector=document.getElementById('exh-sector-filter').value;
+  renderExhibitors(sector?EXHIBITORS.filter(e=>e.sector===sector):EXHIBITORS);
+}
+
+function renderExhibitors(list){
+  const items=list||EXHIBITORS;
+  const grid=document.getElementById('exh-grid');
+  grid.innerHTML=items.map(e=>{
+    const pl=pal(e.name);
+    return `<div class="exh-card" onclick="openM(${e.linked_participant})">
+      <div class="exh-logo" style="background:${pl.bg};color:${pl.fg}">${e.name[0]}</div>
+      <div class="exh-name">${e.name}</div>
+      <div class="exh-sector">${e.sector}</div>
+      <div class="exh-desc">${e.desc}</div>
+      <div class="exh-booth">&#128205; ${e.booth}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── RESOURCE/EXHIBITOR/COMMUNITY TAB SWITCHING ──────────────────────
+function switchResTab(tab){
+  document.querySelectorAll('#view-resources .opp-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#view-resources .opp-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('rtab-'+tab).classList.add('active');
+  document.getElementById('res-panel-'+tab).classList.add('active');
+  if(tab==='resources') renderResources();
+  if(tab==='exhibitors') renderExhibitors();
+}
+
+// ── LIVE POLLING (native, Supabase-ready) ───────────────────────────
+const SESSION_POLLS = {
+  202:{question:'What is your biggest blocker to starting a cross-border venture?',options:['Access to capital','Regulatory complexity','Finding the right co-founder','Market knowledge gap'],votes:[14,9,21,7]},
+  302:{question:'Which skill will matter most in an AI-powered economy?',options:['Critical thinking','Technical / AI literacy','Emotional intelligence','Adaptability'],votes:[28,19,33,15]},
+  305:{question:'Which AI tool category is most useful for your work right now?',options:['Writing & content','Data analysis','Customer communication','Automation'],votes:[22,17,11,9]},
+  401:{question:'Which Agenda 2063 priority matters most to your work?',options:['Decent work & youth employment','Climate action','Education & skills','Digital inclusion'],votes:[19,12,16,8]},
+};
+let myPollVotes={};
+
+function renderSessionPoll(sessionId){
+  const poll=SESSION_POLLS[sessionId];
+  const body=document.getElementById('sm-poll-body');
+  if(!poll){ body.innerHTML='<div class="poll-no-poll">No live poll for this session.</div>'; return; }
+  const total=poll.votes.reduce((a,b)=>a+b,0);
+  const myVote=myPollVotes[sessionId];
+  body.innerHTML=`
+    <div class="poll-question">${poll.question}</div>
+    ${poll.options.map((opt,i)=>{
+      const pct=total?Math.round(poll.votes[i]/total*100):0;
+      const voted=myVote===i;
+      return `<div class="poll-option-row">
+        <button class="poll-option-btn${voted?' voted':''}" onclick="voteSessionPoll(${sessionId},${i})">
+          <div class="poll-option-fill" style="width:${pct}%"></div>
+          <div class="poll-option-content"><span>${opt}</span><span class="poll-option-pct">${pct}%</span></div>
+        </button>
+      </div>`;
+    }).join('')}
+    <div class="poll-total-votes">${total+(myVote!==undefined?0:0)} response${total!==1?'s':''}${myVote!==undefined?' · you voted':''}</div>
+  `;
+}
+
+function voteSessionPoll(sessionId,optionIdx){
+  const poll=SESSION_POLLS[sessionId];
+  if(!poll) return;
+  const prevVote=myPollVotes[sessionId];
+  if(prevVote===optionIdx){ showToast('You already voted for this option'); return; }
+  if(prevVote!==undefined) poll.votes[prevVote]--;
+  poll.votes[optionIdx]++;
+  myPollVotes[sessionId]=optionIdx;
+  renderSessionPoll(sessionId);
+  showToast('Vote recorded');
+}
+
+// ── LIVE Q&A (native, Supabase-ready) ───────────────────────────────
+const SESSION_QA = {};
+let currentQASession=null;
+
+function renderSessionQA(sessionId){
+  currentQASession=sessionId;
+  if(!SESSION_QA[sessionId]) SESSION_QA[sessionId]=[
+    {id:1,text:'How do you handle currency risk when expanding across borders?',asker:'Anonymous delegate',upvotes:6,upvoted:false},
+    {id:2,text:'What is the realistic timeline for registering a business in Rwanda?',asker:'Anonymous delegate',upvotes:4,upvoted:false},
+  ];
+  document.getElementById('qa-input').value='';
+  renderQAList();
+}
+
+function renderQAList(){
+  const questions=[...SESSION_QA[currentQASession]].sort((a,b)=>b.upvotes-a.upvotes);
+  const el=document.getElementById('qa-list');
+  if(!questions.length){el.innerHTML='<div class="poll-no-poll">No questions yet — be the first to ask.</div>';return;}
+  el.innerHTML=questions.map(q=>`
+    <div class="qa-item">
+      <button class="qa-upvote-btn${q.upvoted?' upvoted':''}" onclick="upvoteQuestion(${q.id})">
+        <span>&#9650;</span><span>${q.upvotes}</span>
+      </button>
+      <div>
+        <div class="qa-text">${q.text}</div>
+        <div class="qa-asker">${q.asker}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function submitQuestion(){
+  const input=document.getElementById('qa-input');
+  const text=input.value.trim();
+  if(!text){showToast('Type a question first');return;}
+  const list=SESSION_QA[currentQASession];
+  list.push({id:list.length+1,text,asker:'You',upvotes:1,upvoted:true});
+  input.value='';
+  renderQAList();
+  showToast('Question submitted');
+}
+
+function upvoteQuestion(qid){
+  const q=SESSION_QA[currentQASession].find(x=>x.id===qid);
+  if(!q) return;
+  if(q.upvoted){q.upvotes--;q.upvoted=false;}
+  else{q.upvotes++;q.upvoted=true;}
+  renderQAList();
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────
+const urlP=new URLSearchParams(location.search).get('delegate');
+if(urlP){handleDemoLogin();setTimeout(()=>openM(parseInt(urlP)),200);}
+</script>
+</body>
+</html>
