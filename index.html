@@ -1220,7 +1220,8 @@ function renderDir(list){
   g.innerHTML=ps.map(p=>{
     const pl=pal(p.first+(p.last||''));
     window['_p'+p.id]=p;
-    return `<div class="p-card" onclick="openM(${p.id})">
+    const sid=JSON.stringify(String(p.id));
+    return `<div class="p-card" onclick="openM(${sid})">
       <div class="p-track-bar" style="background:${tc(p.track)}"></div>
       <div class="p-header">
         <div class="avatar" style="width:48px;height:48px;font-size:16px;background:${pl.bg};color:${pl.fg}">${ini(p)}</div>
@@ -1235,8 +1236,8 @@ function renderDir(list){
         ${p.track?`<span class="pill pill-t">${p.track}</span>`:''}
       </div>
       <div class="p-actions">
-        <button class="btn btn-primary" onclick="event.stopPropagation();openM(${p.id})">View profile</button>
-        <button class="btn btn-ghost" onclick="event.stopPropagation();showQR(window['_p${p.id}'])" title="QR card" style="flex:0;padding:7px 12px">
+        <button class="btn btn-primary" onclick="event.stopPropagation();openM(${sid})">View profile</button>
+        <button class="btn btn-ghost" onclick="event.stopPropagation();showQR(window['_p'+String(${sid})])" title="QR card" style="flex:0;padding:7px 12px">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h1v1h-1zM18 14h1v1h-1zM14 18h1v1h-1zM18 18h1v1h-1z" fill="currentColor" stroke="none"/></svg>
         </button>
       </div>
@@ -1262,7 +1263,7 @@ function buildCountryFilter(){
 
 // ── MODAL ──────────────────────────────────────────────────────────────
 function openM(id){
-  const p=allP.find(x=>x.id===id); if(!p) return;
+  const p=allP.find(x=>String(x.id)===String(id)); if(!p) return;
   const pl=pal(p.first+(p.last||''));
   const av=document.getElementById('m-av');
   av.style.background=pl.bg; av.style.color=pl.fg; av.textContent=ini(p);
@@ -1280,7 +1281,7 @@ function openM(id){
     <button class="btn btn-primary" onclick="showQR(window['_p${p.id}'])">QR card</button>
     ${p.linkedin?`<a class="btn btn-ghost" href="${p.linkedin}" target="_blank">LinkedIn &#8599;</a>`:''}
     ${p.cal_link?`<a class="btn btn-teal" href="${p.cal_link}" target="_blank">Book a meeting</a>`:''}
-    <button class="btn btn-ghost" onclick="showToast('Connection request sent to ${p.first}!')">Connect</button>
+    <button class="btn btn-ghost" onclick="showToast('Connection request sent!')">Connect</button>
   `;
   document.getElementById('m-overlay').classList.add('open');
 }
@@ -2205,7 +2206,7 @@ function renderExhibitors(list){
   const grid=document.getElementById('exh-grid');
   grid.innerHTML=items.map(e=>{
     const pl=pal(e.name);
-    return `<div class="exh-card" onclick="openM(${e.linked_participant})">
+    return `<div class="exh-card" onclick="openM(${JSON.stringify(String(e.linked_participant))})">
       <div class="exh-logo" style="background:${pl.bg};color:${pl.fg}">${e.name[0]}</div>
       <div class="exh-name">${e.name}</div>
       <div class="exh-sector">${e.sector}</div>
