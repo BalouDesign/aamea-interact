@@ -360,12 +360,37 @@ nav{position:sticky;top:0;z-index:100;background:var(--aamea-deep);padding:0 24p
     <div class="login-card">
       <div class="login-logo">AAMEA<span> · </span>Interact</div>
       <div class="login-tag">Kigali, Rwanda &nbsp;·&nbsp; 20–23 August 2026</div>
-      <div class="fg"><label class="fl">Email address</label><input type="email" class="fi" id="li-email" placeholder="you@example.com"></div>
-      <div class="fg"><label class="fl">Password</label><input type="password" class="fi" id="li-pass" placeholder="••••••••"></div>
-      <button class="fsave" onclick="handleLogin()">Sign in</button>
+
+      <!-- TAB TOGGLE -->
+      <div style="display:flex;background:var(--surface);border-radius:var(--pill-r);padding:4px;margin-bottom:24px;gap:4px">
+        <button id="auth-tab-signin" onclick="switchAuthTab('signin')" style="flex:1;padding:8px;border:none;border-radius:var(--pill-r);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;background:var(--aamea-deep);color:var(--white);transition:all 0.15s">Sign in</button>
+        <button id="auth-tab-signup" onclick="switchAuthTab('signup')" style="flex:1;padding:8px;border:none;border-radius:var(--pill-r);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;background:transparent;color:var(--ink-soft);transition:all 0.15s">Create account</button>
+      </div>
+
+      <!-- SIGN IN PANEL -->
+      <div id="auth-panel-signin">
+        <div class="fg"><label class="fl">Email address</label><input type="email" class="fi" id="li-email" placeholder="you@example.com"></div>
+        <div class="fg"><label class="fl">Password</label><input type="password" class="fi" id="li-pass" placeholder="••••••••"></div>
+        <button class="fsave" onclick="handleLogin()">Sign in</button>
+        <div style="text-align:center;margin-top:12px">
+          <button onclick="handleForgotPassword()" style="background:none;border:none;font-size:12px;color:var(--ink-soft);cursor:pointer;font-family:'Inter',sans-serif">Forgot password?</button>
+        </div>
+      </div>
+
+      <!-- SIGN UP PANEL -->
+      <div id="auth-panel-signup" style="display:none">
+        <div class="fr">
+          <div class="fg"><label class="fl">First name</label><input type="text" class="fi" id="su-first" placeholder="First name"></div>
+          <div class="fg"><label class="fl">Last name</label><input type="text" class="fi" id="su-last" placeholder="Last name"></div>
+        </div>
+        <div class="fg"><label class="fl">Email address</label><input type="email" class="fi" id="su-email" placeholder="you@example.com"></div>
+        <div class="fg"><label class="fl">Password <span style="color:var(--ink-faint);font-size:11px">(min. 6 characters)</span></label><input type="password" class="fi" id="su-pass" placeholder="••••••••"></div>
+        <button class="fsave" onclick="handleSignUp()">Create account</button>
+      </div>
+
       <div class="login-div">or</div>
       <button class="fsave" style="background:var(--aamea-teal)" onclick="handleDemoLogin()">Explore in demo mode</button>
-      <div class="demo-note"><strong>Demo mode:</strong> Browse 12 sample participants, test the directory, profiles, and QR cards — no account needed. Connect Supabase later to go live.</div>
+      <div class="demo-note"><strong>New here?</strong> Create an account to build your delegate profile, save sessions, post opportunities, and connect with other alumni.</div>
     </div>
   </div>
 </div>
@@ -1120,15 +1145,63 @@ function handleDemoLogin(){
   allP=DEMO; renderDir(); buildCountryFilter(); updateNavAv();
   showView('directory'); showToast('Welcome to AAMEA Interact');
 }
+function switchAuthTab(tab){
+  const signin = document.getElementById('auth-panel-signin');
+  const signup = document.getElementById('auth-panel-signup');
+  const tabSignin = document.getElementById('auth-tab-signin');
+  const tabSignup = document.getElementById('auth-tab-signup');
+  if(tab==='signin'){
+    signin.style.display='block'; signup.style.display='none';
+    tabSignin.style.background='var(--aamea-deep)'; tabSignin.style.color='var(--white)';
+    tabSignup.style.background='transparent'; tabSignup.style.color='var(--ink-soft)';
+  } else {
+    signin.style.display='none'; signup.style.display='block';
+    tabSignup.style.background='var(--aamea-deep)'; tabSignup.style.color='var(--white)';
+    tabSignin.style.background='transparent'; tabSignin.style.color='var(--ink-soft)';
+  }
+}
+
 function handleLogin(){
   if(DEMO_MODE){handleDemoLogin();return;}
   const email=document.getElementById('li-email').value.trim();
   const pass=document.getElementById('li-pass').value;
   if(!email||!pass){showToast('Enter your email and password');return;}
-  sb.auth.signInWithPassword({email,password:pass}).then(({error})=>{
+  sb.auth.signInWithPassword({email,password:pass}).then(({data,error})=>{
     if(error){showToast('Sign in failed: '+error.message);return;}
     loadP(); showView('directory');
+    showToast('Welcome back!');
   });
+}
+
+async function handleSignUp(){
+  if(DEMO_MODE){handleDemoLogin();return;}
+  const first=document.getElementById('su-first').value.trim();
+  const last=document.getElementById('su-last').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pass=document.getElementById('su-pass').value;
+  if(!first||!email||!pass){showToast('Please fill in all fields');return;}
+  if(pass.length<6){showToast('Password must be at least 6 characters');return;}
+  const{data,error}=await sb.auth.signUp({
+    email, password:pass,
+    options:{data:{first,last}}
+  });
+  if(error){showToast('Sign up failed: '+error.message);return;}
+  // Upsert participant row immediately
+  if(data.user){
+    await sb.from('participants').upsert({id:data.user.id,first,last});
+    currentUser={...currentUser,id:data.user.id,first,last};
+  }
+  loadP(); showView('directory');
+  showToast('Welcome to AAMEA Interact, '+first+'!');
+}
+
+async function handleForgotPassword(){
+  if(DEMO_MODE){showToast('Password reset not available in demo mode');return;}
+  const email=document.getElementById('li-email').value.trim();
+  if(!email){showToast('Enter your email address first');return;}
+  const{error}=await sb.auth.resetPasswordForEmail(email);
+  if(error){showToast('Error: '+error.message);return;}
+  showToast('Password reset email sent — check your inbox');
 }
 
 // ── DIRECTORY ──────────────────────────────────────────────────────────
