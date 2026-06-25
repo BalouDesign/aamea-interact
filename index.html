@@ -389,8 +389,10 @@ nav{position:sticky;top:0;z-index:100;background:var(--aamea-deep);padding:0 24p
       </div>
 
       <div class="login-div">or</div>
-      <button class="fsave" style="background:var(--aamea-teal)" onclick="handleDemoLogin()">Explore in demo mode</button>
-      <div class="demo-note"><strong>New here?</strong> Create an account to build your delegate profile, save sessions, post opportunities, and connect with other alumni.</div>
+      <div id="demo-mode-block">
+        <button class="fsave" style="background:var(--aamea-teal)" onclick="handleDemoLogin()">Explore in demo mode</button>
+        <div class="demo-note"><strong>New here?</strong> Create an account to build your delegate profile, save sessions, post opportunities, and connect with other alumni.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -1166,10 +1168,11 @@ function handleLogin(){
   const email=document.getElementById('li-email').value.trim();
   const pass=document.getElementById('li-pass').value;
   if(!email||!pass){showToast('Enter your email and password');return;}
-  sb.auth.signInWithPassword({email,password:pass}).then(({data,error})=>{
+  sb.auth.signInWithPassword({email,password:pass}).then(async({data,error})=>{
     if(error){showToast('Sign in failed: '+error.message);return;}
+    if(data.user) await loadCurrentUser(data.user.id);
     loadP(); showView('directory');
-    showToast('Welcome back!');
+    showToast('Welcome back, '+currentUser.first+'!');
   });
 }
 
@@ -1190,6 +1193,7 @@ async function handleSignUp(){
   if(data.user){
     await sb.from('participants').upsert({id:data.user.id,first,last});
     currentUser={...currentUser,id:data.user.id,first,last};
+    updateNavAv();
   }
   loadP(); showView('directory');
   showToast('Welcome to AAMEA Interact, '+first+'!');
@@ -1288,7 +1292,8 @@ function showQR(p){
   if(!p||typeof p!=='object') return;
   document.getElementById('qr-name').textContent=p.first+' '+p.last;
   document.getElementById('qr-role').textContent=[p.title,p.org].filter(Boolean).join(' · ');
-  const url=`${location.origin}${location.pathname}?delegate=${p.id}`;
+  const pid=(p.id==='me'&&currentUser.id!=='me')?currentUser.id:p.id;
+  const url=`${location.origin}${location.pathname}?delegate=${pid}`;
   document.getElementById('qr-url').textContent=url;
   document.getElementById('qr-ov').classList.add('open');
   QRCode.toCanvas(document.getElementById('qr-cv'),url,{width:180,margin:1,color:{dark:'#1A2B5E',light:'#F9FAFB'}},e=>{if(e)console.warn(e);});
@@ -1331,9 +1336,20 @@ function saveProfile(){
   currentUser.linkedin=document.getElementById('pf-linkedin').value.trim();
   currentUser.cal_link=document.getElementById('pf-cal').value.trim();
   if(!DEMO_MODE&&sb){
-    sb.from('participants').upsert({...currentUser}).then(({error})=>{
-      if(error) showToast('Save error: '+error.message);
-      else showToast('Profile saved');
+    sb.auth.getUser().then(({data:{user}})=>{
+      if(!user){showToast('Not signed in');return;}
+      const row={
+        id:user.id,
+        first:currentUser.first, last:currentUser.last,
+        title:currentUser.title, org:currentUser.org,
+        country:currentUser.country, track:currentUser.track,
+        bio:currentUser.bio, linkedin:currentUser.linkedin,
+        cal_link:currentUser.cal_link
+      };
+      sb.from('participants').upsert(row).then(({error})=>{
+        if(error) showToast('Save error: '+error.message);
+        else showToast('Profile saved');
+      });
     });
   } else { showToast('Profile saved'); }
   updateNavAv(); renderProfile();
@@ -1348,8 +1364,33 @@ function updateNavAv(){
 // ── SUPABASE LOAD ──────────────────────────────────────────────────────
 async function loadP(){
   if(DEMO_MODE){allP=DEMO;renderDir();buildCountryFilter();return;}
+  // Load current user session first
+  const{data:{user}}=await sb.auth.getUser();
+  if(user) await loadCurrentUser(user.id);
   const{data,error}=await sb.from('participants').select('*');
   allP=error?DEMO:data; renderDir(); buildCountryFilter();
+}
+
+async function loadCurrentUser(uid){
+  const{data,error}=await sb.from('participants').select('*').eq('id',uid).single();
+  if(data){
+    currentUser={
+      id:uid,
+      first:data.first||'',
+      last:data.last||'',
+      title:data.title||'',
+      org:data.org||'',
+      country:data.country||'',
+      track:data.track||'',
+      bio:data.bio||'',
+      linkedin:data.linkedin||'',
+      cal_link:data.cal_link||''
+    };
+    updateNavAv();
+  } else {
+    // No participant row yet — set ID at minimum
+    currentUser={...currentUser,id:uid};
+  }
 }
 
 // ── TOAST ──────────────────────────────────────────────────────────────
@@ -1885,7 +1926,7 @@ function submitOpp(){
     countries:document.getElementById('po-countries').value,
     desc:document.getElementById('po-desc').value,
     contact:document.getElementById('po-contact').value,
-    posted_by:'me',created_at:'2026-08-21',flagged:false
+    posted_by:currentUser.id,created_at:'2026-08-21',flagged:false
   });
   document.getElementById('post-opp-overlay').classList.remove('open');
   renderOpps();
@@ -1949,7 +1990,7 @@ function submitMentorOpt(){
   if(!areas){showToast('Please enter your mentorship areas');return;}
   MENTORS.push({
     id:'m'+(MENTORS.length+1),
-    participant_id:'me',
+    participant_id:currentUser.id,
     areas:areas.split(',').map(a=>a.trim()).filter(Boolean),
     availability:document.getElementById('mo-avail').value,
     max_mentees:document.getElementById('mo-max').value,
@@ -2278,8 +2319,36 @@ function upvoteQuestion(qid){
 }
 
 // ── INIT ───────────────────────────────────────────────────────────────
-const urlP=new URLSearchParams(location.search).get('delegate');
-if(urlP){handleDemoLogin();setTimeout(()=>openM(parseInt(urlP)),200);}
+// Hide demo mode block when live
+if(!DEMO_MODE){
+  const db=document.getElementById('demo-mode-block');
+  if(db) db.style.display='none';
+}
+
+// Hide demo mode button on live
+if(!DEMO_MODE){
+  const db=document.getElementById('demo-mode-block');
+  if(db) db.style.display='none';
+}
+
+// Hide demo mode button on live
+if(!DEMO_MODE){const db=document.getElementById('demo-mode-block');if(db)db.style.display='none';}
+
+// Restore session if user is already logged in
+(async()=>{
+  if(!DEMO_MODE&&sb){
+    const{data:{user}}=await sb.auth.getUser();
+    if(user){
+      await loadCurrentUser(user.id);
+      await loadP();
+      showView('directory');
+      return;
+    }
+  }
+  // Handle delegate QR link
+  const urlP=new URLSearchParams(location.search).get('delegate');
+  if(urlP){handleDemoLogin();setTimeout(()=>openM(parseInt(urlP)),200);}
+})();
 </script>
 </body>
 </html>
